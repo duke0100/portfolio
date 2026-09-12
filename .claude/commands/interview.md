@@ -13,7 +13,13 @@ If the input names a subject area (`spring-core`, `database`, `aws`, …), file 
 that folder. Otherwise infer the folder, reuse an existing one where it fits, and say which you
 picked.
 
-Keep the writing plain and short — everyday words, real technical names explained on first use,
-no padding.
+Two requirements override everything else:
+
+1. **Plain, short writing everywhere** — in the markdown and in the code comments alike. One or
+   two sentences per point, everyday words, one fact per sentence. Keep the real technical names
+   (`@Transactional`, `LAZY`) but say the rest the way you'd say it to a teammate. No padding.
+2. **Production-grade examples only** — real domain objects from the repo, the failure path
+   handled, no `foo`/`bar` toys, no unbounded queries. Review your own code for correctness and
+   cost before reporting, the way a senior engineer reviews a PR.
 
 If `$ARGUMENTS` is empty, ask which topic to cover before doing anything else.

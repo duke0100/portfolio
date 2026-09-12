@@ -48,9 +48,15 @@ correct you if the inference was wrong.
    hostname, or work email domain into any file.** Use `example.com` for contact/email values and
    `localhost` for hosts. The git identity email of this machine is a work address — never copy it
    into a properties file, doc, javadoc or commit body. Never edit `cv/` — it is out of scope.
-5. **Every sentence of prose reads as something you'd actually say out loud, not compressed
-   jargon.** The prose budget (Step 3) is a word-count ceiling, not a license to cram several
-   technical facts into one em-dash-chained clause. See *Step 3 → Write like a person* below.
+5. **Everything you write in words — doc prose and code comments alike — is one or two plain
+   sentences per point, in everyday language.** Say one thing per sentence, the way you would say
+   it to a teammate at a desk. The prose budget (Step 3) is a word-count ceiling, not a license to
+   cram several technical facts into one em-dash-chained clause. See *Step 3 → Write like a person*
+   below; it governs javadoc and `//` comments too, not just the markdown.
+6. **Every example is production code, not a tutorial toy.** Write what you would actually ship
+   and defend in a code review: real domain objects from this repo, real failure handling, real
+   config values. Review your own snippet once for correctness and cost before you keep it. See
+   *Step 4 → Write it like production* below.
 
 ---
 
@@ -191,9 +197,23 @@ property, pitfall and follow-up answer. If you are unsure whether a sentence sur
 whether it changes what the reader would type or decide. If not, delete it.
 
 **Write like a person, not a compressed spec.** The word-count ceiling above is about how *much*
-you say, not an excuse to say it in dense, jargon-stacked run-ons. A bullet that chains three
-technical facts behind em-dashes is harder to parse than one that states the single fact that
-matters, plainly:
+you say, not an excuse to say it in dense, jargon-stacked run-ons.
+
+Three rules, and they apply to **every** piece of writing you produce in this task — the markdown,
+the javadoc on a class you add, the `//` note beside a config line, the `Interview topic:`
+back-link blurb:
+
+1. **One or two sentences per aspect. Never three.** One point, one or two sentences, then stop or
+   move to the next bullet. If a point needs a third sentence, it was really two points — split it.
+2. **Everyday words.** Write "runs before the method" rather than "intercepts at the proxy
+   boundary prior to invocation"; "the second call is free" rather than "subsequent invocations
+   resolve from the cache without a round trip". Keep the real technical names an interviewer
+   expects (`@Transactional`, `LAZY`, partition key, `@EntityGraph`) — never soften those away —
+   but let the words *around* them be ordinary.
+3. **One fact per sentence.** A bullet that chains three technical facts behind em-dashes is
+   harder to parse than one that states the single fact that matters, plainly.
+
+Examples of the difference:
 
 - Prefer "If every order shared one buyer, Hibernate's cache would hide the bug — that's why the
   test uses a different buyer per order." over "Rows sharing an FK are absorbed by the
@@ -201,11 +221,15 @@ matters, plainly:
 - Prefer "You must write your own countQuery — Hibernate can't derive one automatically for a
   fetch join." over "The explicit `countQuery` is mandatory: Spring Data would otherwise derive
   the count from the main query and Hibernate rejects `count(o)` over a `join fetch`."
-- Keep the real technical names (`@EntityGraph`, `LazyInitializationException`, partition key) —
-  don't soften those away — but say only one thing per sentence, and say it the way you'd explain
-  it to a teammate, not the way you'd write a spec clause.
+- Prefer "The connection stays open until the transaction ends, so keep the method short." over
+  "Connection affinity persists for the transactional scope — long-running logic starves the
+  pool."
 
-This applies to every bullet, table cell, and Q&A answer, not just the top-level Answer section.
+This applies to every bullet, table cell, and Q&A answer, not just the top-level Answer section —
+and to the comments you write in Step 4 and Step 5.
+
+**A quick test before you keep a sentence:** read it aloud. If you would not say it that way to a
+colleague, rewrite it. If it takes a breath and a half, cut it in two.
 
 ### Step 4 — Apply the topic to the chosen project
 Write real, compiling code that exercises the topic in the routed module. Guidelines:
@@ -226,6 +250,33 @@ Write real, compiling code that exercises the topic in the routed module. Guidel
   values in `application.properties` and the deliberately loosened ones in
   `application-<profile>.properties`, each with a comment saying which is which. That pair is what
   the doc's comparison table is built from.
+
+#### Write it like production
+
+Every example — the code in the module and the snippet in the doc — must be something a senior
+engineer would ship and defend in review. A `foo`/`bar` demo that only proves the annotation
+compiles is a failed example. Concretely:
+
+| Toy example (reject) | Production example (write this) |
+|---|---|
+| `class Foo { void doSomething() }` | The real domain: `Order`, `Product`, `Category`, `User` and the real use case around them |
+| Happy path only | The failure the feature exists for — timeout, empty result, optimistic-lock clash, duplicate key — handled the way you'd handle it live |
+| `System.out.println` / swallowed exception | Proper logging, or the exception translated through `GlobalExceptionHandler` into `ApiResponse` |
+| Magic numbers inline | Named constants, or a property with a sensible default |
+| Fetches everything, then filters in Java | Pushes the work into the query: projection, paging, index-friendly predicate |
+| `@Autowired` field, no validation, raw entity as request body | Constructor injection, `@Valid` request DTO, response DTO |
+
+Two extra passes, both required, before you move to Step 5:
+
+- **Correctness pass.** Re-read your own code as if reviewing a colleague's PR. Is the transaction
+  boundary in the right place? Is anything nullable that you dereference? Does the query do what
+  the method name promises? Fix what you find.
+- **Cost pass.** Ask what this does at realistic volume — project2 has around a million products,
+  so a missing `Pageable` or an N+1 is a real bug there, not a nitpick. Prefer the version that
+  does fewer round trips and holds the connection for less time, as long as it stays readable.
+
+Scale the example to the topic, not beyond it: still additive, still one focused feature. "Like
+production" means the quality bar, not extra scope.
 
 ### Step 5 — Back-link code → doc
 
@@ -271,6 +322,9 @@ Rules for the link:
   clickable one.
 - Keep the literal prefix `Interview topic:` (or `- see ` in a properties/XML comment) so the whole
   set is greppable: `grep -rn "docs/interview/" back-end/`.
+- The blurb beside the link, and any javadoc on the class or method, follow the same writing rules
+  as the doc: one or two plain sentences, everyday words, one fact each. Say why this code exists
+  or what would break without it — not a restatement of the code below it.
 - A long file gets **several** anchors, one per block the doc quotes — e.g. `application.properties`
   carries `#config` at the exposure block, `#liveness-and-readiness` at the probe group,
   `#custom-metrics` at the histogram settings.
@@ -349,6 +403,9 @@ Then run this checklist before you report. Each line is a mistake that has actua
 | Doc claims match the POM | e.g. do not write `starter-aop` in a javadoc when the POM has `starter-aspectj` — fix whichever is wrong |
 | Prose budget | 150–250 words outside code and tables; no `Concept`/`How it works` narration |
 | Prose reads as plain human sentences | no bullet/cell chains 2+ technical facts behind em-dashes into one clause — see *Write like a person* in Step 3 |
+| One or two sentences per point, everyday words | applies to doc bullets, table cells, Q&A answers **and** every javadoc / `//` comment you added — read them aloud; rewrite anything you would not say to a colleague |
+| Examples are production-grade | real domain objects, the failure path handled, no `foo`/`bar`, no unbounded query — see *Write it like production* in Step 4 |
+| You reviewed your own code | correctness pass and cost pass both done — say in the report what they changed, or that they found nothing |
 
 ---
 
@@ -370,8 +427,8 @@ of those files carries an `Interview topic:` back-link to the section here.
 
 ## Answer
 
-<2–5 sentences you could say out loud. What it is, and the decision you would defend. No hedging,
-no "in this document we will".>
+<2–5 short sentences you could say out loud, one fact each, everyday words. What it is, and the
+decision you would defend. No hedging, no "in this document we will".>
 
 [`project<n>/pom.xml`](../../../project<n>/pom.xml):
 
@@ -490,6 +547,8 @@ Close with a short report, not a recap of the doc:
   the folder yourself rather than being told),
 - the module and files changed, and that each one carries a back-link anchor,
 - the compile result,
+- one line on what your correctness and cost review passes changed in the example (or that they
+  found nothing),
 - one line on what the reader should open first,
 - anything you deliberately left out.
 
