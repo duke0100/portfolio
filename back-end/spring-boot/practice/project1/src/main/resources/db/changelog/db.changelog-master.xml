@@ -1,0 +1,34 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<databaseChangeLog
+        xmlns="http://www.liquibase.org/xml/ns/dbchangelog"
+        xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+        xsi:schemaLocation="
+            http://www.liquibase.org/xml/ns/dbchangelog
+            https://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-latest.xsd">
+
+    <changeSet id="1" author="system">
+        <sqlFile path="classpath:db/changelog/changes/V1__create_users.sql"
+                 relativeToChangelogFile="false"/>
+    </changeSet>
+
+    <changeSet id="2" author="system">
+        <sqlFile path="classpath:db/changelog/changes/V2__create_categories.sql"
+                 relativeToChangelogFile="false"/>
+    </changeSet>
+
+    <changeSet id="3" author="system">
+        <sqlFile path="classpath:db/changelog/changes/V3__create_products.sql"
+                 relativeToChangelogFile="false"/>
+    </changeSet>
+
+    <changeSet id="4" author="system">
+        <sqlFile path="classpath:db/changelog/changes/V4__create_orders.sql"
+                 relativeToChangelogFile="false"/>
+    </changeSet>
+
+    <changeSet id="5" author="system">
+        <sqlFile path="classpath:db/changelog/changes/V5__create_order_details.sql"
+                 relativeToChangelogFile="false"/>
+    </changeSet>
+
+</databaseChangeLog>

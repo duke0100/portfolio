@@ -1,0 +1,386 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Duc Vo — Senior Backend Developer</title>
+<meta name="description" content="Portfolio of Duc Vo, Senior Backend Developer — 8 years of experience in Java, Spring Boot, microservices, and high-performance backend systems.">
+<style>
+  :root {
+    --bg: #0e1116;
+    --bg-soft: #161b22;
+    --card: #1b222c;
+    --border: #2b3442;
+    --text: #e6edf3;
+    --muted: #9aa7b4;
+    --accent: #4da3ff;
+    --accent-soft: rgba(77, 163, 255, .12);
+    --chip-bg: #222b37;
+    --max: 960px;
+  }
+  @media (prefers-color-scheme: light) {
+    :root {
+      --bg: #f7f9fb;
+      --bg-soft: #eef2f6;
+      --card: #ffffff;
+      --border: #dde4ec;
+      --text: #1c2733;
+      --muted: #5b6a7a;
+      --accent: #0b6fd6;
+      --accent-soft: rgba(11, 111, 214, .08);
+      --chip-bg: #e9eef4;
+    }
+  }
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+  html { scroll-behavior: smooth; }
+  body {
+    background: var(--bg);
+    color: var(--text);
+    font: 16px/1.65 -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+    -webkit-font-smoothing: antialiased;
+  }
+  a { color: var(--accent); text-decoration: none; }
+  a:hover { text-decoration: underline; }
+  .wrap { max-width: var(--max); margin: 0 auto; padding: 0 24px; }
+
+  /* ---- nav ---- */
+  nav {
+    position: sticky; top: 0; z-index: 10;
+    background: color-mix(in srgb, var(--bg) 85%, transparent);
+    backdrop-filter: blur(10px);
+    border-bottom: 1px solid var(--border);
+  }
+  nav .wrap { display: flex; align-items: center; gap: 20px; height: 56px; }
+  nav .brand { font-weight: 700; color: var(--text); }
+  nav .links { margin-left: auto; display: flex; gap: 18px; flex-wrap: wrap; }
+  nav .links a { color: var(--muted); font-size: 14px; }
+  nav .links a:hover { color: var(--accent); text-decoration: none; }
+
+  /* ---- hero ---- */
+  header { padding: 72px 0 56px; background: linear-gradient(180deg, var(--bg-soft), var(--bg)); }
+  .eyebrow { color: var(--accent); font-weight: 600; letter-spacing: .08em; text-transform: uppercase; font-size: 13px; }
+  h1 { font-size: clamp(34px, 6vw, 52px); line-height: 1.15; margin: 10px 0 14px; }
+  .tagline { color: var(--muted); font-size: 18px; max-width: 640px; }
+  .hero-actions { margin-top: 28px; display: flex; gap: 12px; flex-wrap: wrap; }
+  .btn {
+    display: inline-flex; align-items: center; gap: 8px;
+    padding: 10px 18px; border-radius: 8px; font-weight: 600; font-size: 15px;
+    border: 1px solid var(--border); color: var(--text); background: var(--card);
+    transition: transform .12s ease, border-color .12s ease;
+  }
+  .btn:hover { text-decoration: none; transform: translateY(-1px); border-color: var(--accent); }
+  .btn.primary { background: var(--accent); border-color: var(--accent); color: #fff; }
+  .hero-stats { display: flex; gap: 32px; margin-top: 40px; flex-wrap: wrap; }
+  .stat b { display: block; font-size: 26px; }
+  .stat span { color: var(--muted); font-size: 14px; }
+
+  /* ---- sections ---- */
+  section { padding: 56px 0; }
+  section + section { border-top: 1px solid var(--border); }
+  h2 { font-size: 26px; margin-bottom: 6px; }
+  .section-sub { color: var(--muted); margin-bottom: 28px; max-width: 680px; }
+
+  /* ---- highlights ---- */
+  .highlights { display: grid; grid-template-columns: repeat(auto-fit, minmax(260px, 1fr)); gap: 14px; }
+  .highlights li {
+    list-style: none; background: var(--card); border: 1px solid var(--border);
+    border-radius: 10px; padding: 14px 16px; font-size: 15px;
+  }
+
+  /* ---- skills ---- */
+  .skills { display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap: 16px; }
+  .skill-card { background: var(--card); border: 1px solid var(--border); border-radius: 12px; padding: 20px; }
+  .skill-card h3 { font-size: 15px; margin-bottom: 12px; color: var(--accent); }
+  .chips { display: flex; flex-wrap: wrap; gap: 8px; }
+  .chip {
+    background: var(--chip-bg); border: 1px solid var(--border);
+    border-radius: 999px; padding: 3px 12px; font-size: 13px; color: var(--text);
+  }
+
+  /* ---- projects ---- */
+  .project {
+    background: var(--card); border: 1px solid var(--border); border-radius: 12px;
+    padding: 26px; margin-bottom: 20px;
+  }
+  .project-head { display: flex; align-items: baseline; gap: 12px; flex-wrap: wrap; margin-bottom: 4px; }
+  .project h3 { font-size: 19px; }
+  .role { color: var(--accent); font-size: 13px; font-weight: 600; background: var(--accent-soft); border-radius: 999px; padding: 2px 12px; }
+  .project p.desc { color: var(--muted); margin: 8px 0 14px; }
+  .project ul { margin: 0 0 16px 20px; }
+  .project ul li { margin-bottom: 6px; font-size: 15px; }
+  .tech { display: flex; flex-wrap: wrap; gap: 8px; }
+
+  /* ---- lab ---- */
+  .lab-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap: 16px; }
+  .lab-card {
+    background: var(--card); border: 1px solid var(--border); border-radius: 12px; padding: 20px;
+    display: flex; flex-direction: column; gap: 8px;
+  }
+  .lab-card h3 { font-size: 16px; }
+  .lab-card p { color: var(--muted); font-size: 14px; flex: 1; }
+  .lab-card a { font-size: 14px; font-weight: 600; }
+
+  /* ---- education / footer ---- */
+  .edu { background: var(--card); border: 1px solid var(--border); border-radius: 12px; padding: 22px 26px; }
+  .edu b { display: block; font-size: 17px; }
+  .edu span { color: var(--muted); }
+  footer { border-top: 1px solid var(--border); padding: 32px 0 48px; color: var(--muted); font-size: 14px; }
+  footer .wrap { display: flex; justify-content: space-between; gap: 16px; flex-wrap: wrap; }
+</style>
+</head>
+<body>
+
+<nav>
+  <div class="wrap">
+    <span class="brand">Duc Vo</span>
+    <div class="links">
+      <a href="#skills">Skills</a>
+      <a href="#projects">Projects</a>
+      <a href="#lab">Engineering Lab</a>
+      <a href="#education">Education</a>
+    </div>
+  </div>
+</nav>
+
+<header>
+  <div class="wrap">
+    <div class="eyebrow">Senior Backend Developer</div>
+    <h1>Duc Vo</h1>
+    <p class="tagline">
+      Backend engineer with 8 years of experience building Java / Spring Boot systems —
+      microservices, high-performance APIs, event-driven architectures, and SaaS multi-tenant platforms.
+    </p>
+    <div class="hero-actions">
+      <a class="btn primary" href="https://github.com/gavin0100" target="_blank" rel="noopener">GitHub</a>
+      <a class="btn" href="https://github.com/gavin0100/dev-documentation" target="_blank" rel="noopener">This site's source</a>
+    </div>
+    <div class="hero-stats">
+      <div class="stat"><b>8+</b><span>years of experience</span></div>
+      <div class="stat"><b>Java · Spring</b><span>core stack</span></div>
+      <div class="stat"><b>AWS · Azure</b><span>cloud platforms</span></div>
+    </div>
+  </div>
+</header>
+
+<section id="highlights">
+  <div class="wrap">
+    <h2>Highlights</h2>
+    <p class="section-sub">What I bring to a backend team.</p>
+    <ul class="highlights">
+      <li>Strong Java core foundations — OOP, collections framework, multithreading — applied to production backend systems.</li>
+      <li>Deep Spring expertise: Spring Boot, Spring MVC, Spring Security, API design, system integration, and performance-focused development.</li>
+      <li>Hands-on with microservices architecture and SaaS multi-tenant applications.</li>
+      <li>Relational database design, query optimization, and caching strategies for high-performance backends.</li>
+      <li>Practical experience with messaging systems and event-driven architecture (Kafka, Amazon SNS/SQS).</li>
+      <li>CI/CD pipelines, automation practices, Git, and cloud platforms as everyday tools.</li>
+      <li>Agile teamwork — code reviews, technical discussions, and cross-functional collaboration.</li>
+    </ul>
+  </div>
+</section>
+
+<section id="skills">
+  <div class="wrap">
+    <h2>Technical Skills</h2>
+    <p class="section-sub">The stack I work with daily.</p>
+    <div class="skills">
+      <div class="skill-card">
+        <h3>Languages &amp; Frameworks</h3>
+        <div class="chips">
+          <span class="chip">Java</span><span class="chip">TypeScript</span><span class="chip">JavaScript</span>
+          <span class="chip">Spring Boot</span><span class="chip">Spring Security</span><span class="chip">Spring Data JPA</span>
+          <span class="chip">Hibernate</span><span class="chip">JUnit</span><span class="chip">Angular</span>
+        </div>
+      </div>
+      <div class="skill-card">
+        <h3>Databases &amp; Caching</h3>
+        <div class="chips">
+          <span class="chip">PostgreSQL</span><span class="chip">MySQL</span><span class="chip">Redis</span>
+          <span class="chip">OpenSearch</span><span class="chip">Cassandra</span>
+          <span class="chip">Liquibase</span><span class="chip">Flyway</span>
+        </div>
+      </div>
+      <div class="skill-card">
+        <h3>Messaging &amp; Integration</h3>
+        <div class="chips">
+          <span class="chip">Kafka</span><span class="chip">Kafka Connect</span>
+          <span class="chip">Amazon SNS</span><span class="chip">Amazon SQS</span>
+          <span class="chip">WebSocket / STOMP</span><span class="chip">REST / OpenAPI</span>
+        </div>
+      </div>
+      <div class="skill-card">
+        <h3>Cloud &amp; DevOps</h3>
+        <div class="chips">
+          <span class="chip">AWS (EKS, Lambda, S3, SES, CloudWatch)</span>
+          <span class="chip">Azure (AKS, App Service, Blob Storage)</span>
+          <span class="chip">Docker</span><span class="chip">Kubernetes / Helm</span>
+          <span class="chip">Azure Pipelines</span><span class="chip">GitLab CI</span><span class="chip">Jenkins</span>
+        </div>
+      </div>
+      <div class="skill-card">
+        <h3>Security &amp; Identity</h3>
+        <div class="chips">
+          <span class="chip">OAuth2 / OIDC</span><span class="chip">Keycloak</span>
+          <span class="chip">RBAC</span><span class="chip">Field-level encryption</span>
+        </div>
+      </div>
+      <div class="skill-card">
+        <h3>Design &amp; Architecture</h3>
+        <div class="chips">
+          <span class="chip">Microservices</span><span class="chip">Serverless</span><span class="chip">Monolith</span>
+          <span class="chip">MVC</span><span class="chip">Design Patterns</span><span class="chip">Swagger / OpenAPI</span>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<section id="projects">
+  <div class="wrap">
+    <h2>Relevant Projects</h2>
+    <p class="section-sub">Selected production systems I've built and maintained as a Senior Developer.</p>
+
+    <article class="project">
+      <div class="project-head">
+        <h3>Population Registry &amp; Identity Management Platform</h3>
+        <span class="role">Senior Developer</span>
+      </div>
+      <p class="desc">
+        A microservices-based population registry and identity management platform: person records,
+        biographic and biometric identities, unique ID generation, civil registry workflows
+        (birth, death, marriage, divorce), audit logging, and pub/sub notifications for
+        government identity operations.
+      </p>
+      <ul>
+        <li>Developed and maintained Spring Boot backend services across multiple coordinated microservices.</li>
+        <li>Designed RESTful APIs following the OSIA specification for identity management interoperability.</li>
+        <li>Implemented OAuth2/OIDC authentication with Keycloak and field-level encryption for sensitive data.</li>
+        <li>Built service integrations via REST, pub/sub messaging, event-driven workflows, and ABIS biometric matching.</li>
+        <li>Contributed to shared libraries and common backend components reused across services.</li>
+      </ul>
+      <div class="tech">
+        <span class="chip">Java · Spring Boot</span><span class="chip">PostgreSQL</span><span class="chip">OpenSearch</span>
+        <span class="chip">Kafka + Kafka Connect</span><span class="chip">Keycloak</span>
+        <span class="chip">Azure AKS</span><span class="chip">Docker · K8s</span><span class="chip">Angular</span>
+      </div>
+    </article>
+
+    <article class="project">
+      <div class="project-head">
+        <h3>Import Registration Management System</h3>
+        <span class="role">Senior Developer</span>
+      </div>
+      <p class="desc">
+        Backend services for an import registration system managing vehicle registration, warehouse
+        queues, and real-time status updates across multiple distribution centers.
+      </p>
+      <ul>
+        <li>Built services for registration, queue management, warehouse processing, notifications, and authentication.</li>
+        <li>Designed asynchronous event processing with Amazon SNS/SQS for queue updates and notification workflows.</li>
+        <li>Implemented real-time queue status via WebSocket/STOMP and Google Cloud Text-to-Speech driver announcements.</li>
+        <li>Optimized SQL queries, indexing, and service interactions under concurrent load.</li>
+        <li>Established reusable scaffolding, shared libraries, and coding conventions adopted across services.</li>
+      </ul>
+      <div class="tech">
+        <span class="chip">Java 21 · Spring Boot 3</span><span class="chip">Spring Cloud</span><span class="chip">MySQL 8 · Flyway</span>
+        <span class="chip">SNS / SQS</span><span class="chip">AWS EKS</span><span class="chip">Keycloak · RBAC</span>
+        <span class="chip">WebSocket / STOMP</span><span class="chip">Jenkins</span>
+      </div>
+    </article>
+
+    <article class="project">
+      <div class="project-head">
+        <h3>Finance Management System</h3>
+        <span class="role">Senior Developer</span>
+      </div>
+      <p class="desc">
+        A centralized platform for managing financial activities and digital communications —
+        income, expense, and budget tracking plus a categorized notifications hub, consolidated
+        into a single dashboard.
+      </p>
+      <ul>
+        <li>Developed and maintained RESTful APIs for the backend microservices.</li>
+        <li>Designed database schemas and implemented schema changes.</li>
+        <li>Reviewed code changes and supported team members on technical issues.</li>
+      </ul>
+      <div class="tech">
+        <span class="chip">Java · Spring Boot</span><span class="chip">PostgreSQL</span><span class="chip">Redis</span>
+        <span class="chip">Kafka</span><span class="chip">Keycloak</span><span class="chip">SonarQube</span><span class="chip">Angular</span>
+      </div>
+    </article>
+
+    <article class="project">
+      <div class="project-head">
+        <h3>Retail Management System</h3>
+        <span class="role">Senior Developer</span>
+      </div>
+      <p class="desc">
+        A web application providing inventory, order, shipment, and customer management tools.
+      </p>
+      <ul>
+        <li>Developed and maintained RESTful APIs, database migrations, and third-party integrations.</li>
+        <li>Maintained clear module boundaries and code organization; mentored junior developers through reviews.</li>
+        <li>Investigated and resolved production issues, with technical documentation and customer support.</li>
+      </ul>
+      <div class="tech">
+        <span class="chip">Java · Spring Boot</span><span class="chip">Spring Security</span><span class="chip">PostgreSQL</span>
+        <span class="chip">Azure AD · Blob Storage</span><span class="chip">Kafka</span><span class="chip">JUnit · Mockito</span>
+      </div>
+    </article>
+  </div>
+</section>
+
+<section id="lab">
+  <div class="wrap">
+    <h2>Engineering Lab</h2>
+    <p class="section-sub">
+      This site lives inside my public learning repository — a hands-on lab where every Spring Boot
+      concept gets one real implementation, not a toy snippet.
+    </p>
+    <div class="lab-grid">
+      <div class="lab-card">
+        <h3>Multi-module practice reactor</h3>
+        <p>A Maven monorepo on Spring Boot 4 / Java 25: a shared common-lib plus three services —
+           MySQL + Liquibase, PostgreSQL + Actuator, and Cassandra — each dedicated to a topic area.</p>
+        <a href="https://github.com/gavin0100/dev-documentation/tree/main/back-end/spring-boot/practice" target="_blank" rel="noopener">View module →</a>
+      </div>
+      <div class="lab-card">
+        <h3>Performance at 1M+ rows</h3>
+        <p>Seeded a million products, orders, and users to benchmark indexing, pagination,
+           N+1 elimination, JDBC batching, and caching against real data volumes.</p>
+        <a href="https://github.com/gavin0100/dev-documentation/tree/main/back-end/spring-boot/practice/project2" target="_blank" rel="noopener">View project →</a>
+      </div>
+      <div class="lab-card">
+        <h3>Interview-ready write-ups</h3>
+        <p>Compressed cheat-sheets on Spring Boot internals — actuator, test slices vs Mockito,
+           and more — each cross-linked to the real code that applies it.</p>
+        <a href="https://github.com/gavin0100/dev-documentation/tree/main/back-end/spring-boot/practice/docs/interview" target="_blank" rel="noopener">Read docs →</a>
+      </div>
+      <div class="lab-card">
+        <h3>Security &amp; integration playground</h3>
+        <p>Standalone modules for Spring Security authentication/authorization, Keycloak,
+           OpenSearch, auditing with multiple datasources, and CORS.</p>
+        <a href="https://github.com/gavin0100/dev-documentation/tree/main/back-end/spring-boot" target="_blank" rel="noopener">Browse modules →</a>
+      </div>
+    </div>
+  </div>
+</section>
+
+<section id="education">
+  <div class="wrap">
+    <h2>Education</h2>
+    <div class="edu">
+      <b>HCMC University of Technology and Education</b>
+      <span>Bachelor of Information Technology</span>
+    </div>
+  </div>
+</section>
+
+<footer>
+  <div class="wrap">
+    <span>© 2026 Duc Vo — Senior Backend Developer</span>
+    <span><a href="https://github.com/gavin0100" target="_blank" rel="noopener">github.com/gavin0100</a></span>
+  </div>
+</footer>
+
+</body>
+</html>

@@ -1,0 +1,2 @@
+- [common-lib beans need scanBasePackages](project_commonlib_scanbasepackages.md) — why scanBasePackages (not auto-configuration) is the fix for common-lib beans not registering; applies to all 3 apps.
+- [Boot 4.0.3 TestRestTemplate gotcha](project_boot4_testresttemplate.md) — @AutoConfigureTestRestTemplate + spring-boot-starter-restclient (test scope) both required, beyond spring-boot-starter-webmvc-test.

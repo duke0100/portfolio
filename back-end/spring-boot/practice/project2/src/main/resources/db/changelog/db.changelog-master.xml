@@ -1,0 +1,21 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<databaseChangeLog
+        xmlns="http://www.liquibase.org/xml/ns/dbchangelog"
+        xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+        xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog
+        http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-4.29.xsd">
+
+    <include file="db/changelog/changes/V1__create_users.sql"/>
+    <include file="db/changelog/changes/V2__create_categories.sql"/>
+    <include file="db/changelog/changes/V3__create_products.sql"/>
+    <include file="db/changelog/changes/V4__create_orders.sql"/>
+    <include file="db/changelog/changes/V5__create_order_details.sql"/>
+    <!-- Interview topic: docs/interview/database/01-database-migrations.md#versioned-migration -->
+    <include file="db/changelog/changes/V6__add_low_stock_threshold_to_products.sql"/>
+    <!-- Interview topic: docs/interview/spring-data-jpa/02-jpql-criteria-native-queries.md#native-query -->
+    <include file="db/changelog/changes/V7__add_product_search_indexes.sql"/>
+    <!-- Owning side of a one-to-many - see docs/interview/spring-data-jpa/03-jpa-relationship-annotations.md#owning-side -->
+    <include file="db/changelog/changes/V8__create_product_reviews.sql"/>
+    <!-- Join table for a many-to-many - see docs/interview/spring-data-jpa/03-jpa-relationship-annotations.md#jointable-many-to-many -->
+    <include file="db/changelog/changes/V9__create_tags_and_product_tags.sql"/>
+</databaseChangeLog>

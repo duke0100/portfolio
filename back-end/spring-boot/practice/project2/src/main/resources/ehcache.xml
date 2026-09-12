@@ -1,0 +1,32 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+  Interview topic: docs/interview/spring-data-jpa/01-first-level-vs-second-level-cache.md#second-level-cache
+  JCache region config for Hibernate's L2 cache, loaded via hibernate.javax.cache.uri=ehcache.xml in
+  application.properties (Hibernate resolves it as a plain classpath resource name, not a URI with
+  a "classpath:" scheme). Region names must match the "region" attribute on each @Cache-annotated
+  entity - "categoryCache" is Category's region (see Category.java).
+-->
+<config xmlns="http://www.ehcache.org/v3">
+
+    <cache alias="categoryCache">
+        <expiry>
+            <ttl unit="minutes">30</ttl>
+        </expiry>
+        <resources>
+            <heap unit="entries">500</heap>
+        </resources>
+    </cache>
+
+    <!-- Hibernate's own bookkeeping region: tracks per-table last-update timestamps so a cached
+         entity can be invalidated after a write. Declared explicitly so it gets a real eviction
+         policy instead of Hibernate's create-warn default (unbounded heap, one log warning). -->
+    <cache alias="default-update-timestamps-region">
+        <expiry>
+            <none/>
+        </expiry>
+        <resources>
+            <heap unit="entries">5000</heap>
+        </resources>
+    </cache>
+
+</config>

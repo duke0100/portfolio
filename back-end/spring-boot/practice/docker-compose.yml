@@ -1,0 +1,84 @@
+version: '3.8'
+
+services:
+  mysql:
+    image: mysql:8.4
+    container_name: practice-mysql
+    restart: unless-stopped
+    environment:
+      MYSQL_ROOT_PASSWORD: root_password
+      MYSQL_DATABASE: project1_db
+      MYSQL_USER: project1_user
+      MYSQL_PASSWORD: project1_pass
+    ports:
+      - "3306:3306"
+    volumes:
+      - mysql_data:/var/lib/mysql
+      - ./init/mysql:/docker-entrypoint-initdb.d
+    networks:
+      - practice-network
+    healthcheck:
+      test: ["CMD", "mysqladmin", "ping", "-h", "localhost", "-u", "root", "-proot_password"]
+      interval: 30s
+      timeout: 10s
+      retries: 5
+      start_period: 40s
+
+  postgresql:
+    image: postgres:17
+    container_name: practice-postgresql
+    restart: unless-stopped
+    environment:
+      POSTGRES_DB: project2_db
+      POSTGRES_USER: project2_user
+      POSTGRES_PASSWORD: project2_pass
+    ports:
+      - "5434:5432"
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+      - ./init/postgresql:/docker-entrypoint-initdb.d
+    networks:
+      - practice-network
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U project2_user -d project2_db"]
+      interval: 30s
+      timeout: 10s
+      retries: 5
+      start_period: 30s
+
+  cassandra:
+    image: cassandra:4.1
+    container_name: practice-cassandra
+    restart: unless-stopped
+    environment:
+      CASSANDRA_CLUSTER_NAME: PracticeCluster
+      CASSANDRA_DC: datacenter1
+      CASSANDRA_RACK: rack1
+      CASSANDRA_ENDPOINT_SNITCH: GossipingPropertyFileSnitch
+      MAX_HEAP_SIZE: 512M
+      HEAP_NEWSIZE: 128M
+    ports:
+      - "9042:9042"
+      - "7000:7000"
+    volumes:
+      - cassandra_data:/var/lib/cassandra
+    networks:
+      - practice-network
+    healthcheck:
+      test: ["CMD-SHELL", "nodetool status | grep -E '^UN'"]
+      interval: 30s
+      timeout: 10s
+      retries: 10
+      start_period: 60s
+
+volumes:
+  mysql_data:
+    driver: local
+  postgres_data:
+    driver: local
+  cassandra_data:
+    driver: local
+
+networks:
+  practice-network:
+    driver: bridge

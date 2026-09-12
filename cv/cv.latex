@@ -1,0 +1,282 @@
+%------------------------
+% Resume Template
+% Author : Anubhav Singh
+% Github : https://github.com/xprilion
+% License : MIT
+%------------------------
+
+\documentclass[a4paper,13pt]{article} % Change font size to 13pt
+
+\usepackage{latexsym}
+\usepackage[empty]{fullpage}
+\usepackage{titlesec}
+\usepackage{marvosym}
+\usepackage[usenames,dvipsnames]{color}
+\usepackage{verbatim}
+\usepackage{enumitem}
+\usepackage[pdftex]{hyperref}
+\usepackage{fancyhdr}
+\usepackage{times} % Use Times New Roman font
+\usepackage{hyperref}
+\usepackage{graphicx}
+\usepackage{fontawesome}
+\usepackage{array}
+\usepackage[margin=1in]{geometry}
+\usepackage{xcolor}
+\hypersetup{
+    colorlinks=true,
+    linkcolor=black,
+    filecolor=black,
+    urlcolor=black,
+    citecolor=black,
+    pdfborder={0 0 0} % Removes the border around links
+}
+
+\pagestyle{fancy}
+\fancyhf{} % clear all header and footer fields
+\fancyfoot{}
+\renewcommand{\headrulewidth}{0pt}
+\renewcommand{\footrulewidth}{0pt}
+
+% Adjust margins
+\addtolength{\oddsidemargin}{-0.530in}
+\addtolength{\evensidemargin}{-0.375in}
+\addtolength{\textwidth}{1in}
+\addtolength{\textheight}{1in}
+\setlength{\voffset}{-0.20in}
+\addtolength{\topmargin}{-.45in}
+
+\urlstyle{rm}
+
+\raggedbottom
+\raggedright
+\setlength{\tabcolsep}{0in}
+
+% Sections formatting
+\titleformat{\section}{
+  \vspace{-2pt}\scshape\raggedright\large
+}{}{0em}{}[\vspace{-6pt}]
+
+% Convenience shorthands
+\newcommand{\detailsize}{\fontsize{12}{14}\selectfont}
+\newcommand{\subheadsize}{\fontsize{12}{14}\selectfont}
+
+%-------------------------
+% Custom commands
+\newcommand{\resumeItem}[2]{
+  \item\detailsize{
+    \textbf{#1}{: #2 \vspace{-2pt}}
+  }
+}
+
+\newcommand{\resumeItemWithoutTitle}[1]{
+  \item\detailsize{
+    {\vspace{-2pt}}
+  }
+}
+
+\newcommand{\resumeSubheading}[4]{
+  \vspace{-1pt}\item
+    \begin{tabular*}{0.97\textwidth}{l@{\extracolsep{\fill}}r}
+      \textbf{\detailsize #1} & \detailsize #2 \\
+      \textit{\detailsize #3} & \textit{\detailsize #4} \\
+    \end{tabular*}\vspace{-5pt}
+}
+
+% Company heading: left = company+role (bold), right = date
+\newcommand{\expHeading}[2]{%
+  \vspace{2pt}
+  \begin{tabular*}{\textwidth}{l@{\extracolsep{\fill}}r}
+    \textbf{\detailsize #1} & \detailsize #2 \\
+  \end{tabular*}\vspace{0pt}
+}
+
+% Project sub-heading (bold+italic for "Project", rest italic)
+\newcommand{\projectHeading}[1]{%
+  \vspace{1pt}
+  \hspace{12pt}\textbf{\detailsize Project}{\detailsize #1}
+  \vspace{1pt}
+}
+
+\newcommand{\resumeSubItem}[2]{\resumeItem{#1}{#2}\vspace{-3pt}}
+
+\renewcommand{\labelitemii}{$\circ$}
+
+\newcommand{\resumeSubHeadingListStart}{\begin{itemize}[leftmargin=*]}
+\newcommand{\resumeSubHeadingListEnd}{\end{itemize}}
+\newcommand{\resumeItemListStart}{\begin{itemize}}
+\newcommand{\resumeItemListEnd}{\end{itemize}\vspace{-5pt}}
+
+% Black-circle sub-header item (Description / Technologies / Responsibilities)
+\newcommand{\expSubHeader}[1]{%
+  \item[\textbullet] \detailsize\textbf{#1}%
+}
+
+% White-circle detail item
+\newcommand{\expDetail}[1]{%
+  \item[$\circ$] \detailsize #1%
+}
+
+%-----------------------------
+%%%%%%  CV STARTS HERE  %%%%%%
+\definecolor{darkblue}{RGB}{29, 46, 196}
+\begin{document}
+%----------HEADING-----------------
+\begin{tabular*}{\textwidth}{@{\extracolsep{\fill}} l r}
+  \begin{minipage}{0.6\textwidth}
+    \textbf{\LARGE \textcolor{darkblue}{GAVIN VO (\fontsize{13}{15}\selectfont Vo Van Duc)}} \\[1pt]
+    \textbf{\textcolor{darkblue}{BACKEND SOFTWARE ENGINEER}} \\[1.5pt]
+    \detailsize\faEnvelope \ voduc0100@gmail.com \ ~~~\faPhone \ 0869990187 \\[1.5pt]
+    \detailsize\faGithub \ \href{https://github.com/gavin0100}{github.com/gavin0100} \ ~~~~~ \faLinkedin \ \href{https://www.linkedin.com/in/duc010/}{linkedin.com/in/duc010/} \\[1.5pt]
+    \detailsize\faMapMarker \ Thu Duc ward, Ho Chi Minh city (willing to relocate) \\
+  \end{minipage}
+  &
+  \begin{minipage}{0.3\textwidth}
+    \centering
+    \vspace{-10pt}
+    \hspace{80pt}
+    \setlength{\fboxrule}{0.5pt}
+    \fcolorbox{gray!10}{white}{\includegraphics[width=0.4\textwidth]{avatar.jpg}}
+  \end{minipage}
+\end{tabular*}
+
+\vspace{-10pt}
+
+%-----------Summary-----------------
+\section{\textcolor{darkblue}{\textbf{SUMMARY}}}
+\detailsize{~~~~I am a Backend Developer with 2 years of experience in Web Development. I also spend time learning new technologies and best practices to become a better engineer.}
+
+\vspace{2pt}
+
+%-----------EDUCATION-----------------
+\section{\textcolor{darkblue}{\textbf{EDUCATION}}}
+  \resumeSubHeadingListStart
+    \vspace{0pt}\item[]
+      \hspace{-10pt}\begin{tabular*}{1.0\textwidth}[t]{l@{\extracolsep{\fill}}r}
+        \textbf{Ho Chi Minh City University of Technology and Engineering} & Ho Chi Minh City, Viet Nam \\
+        \textit{Major: Software Engineer.~~~~~~~~~GPA: 3.4/4.0} & \textit{10/2020 - 11/2024} \\
+      \end{tabular*}\vspace{-5pt}
+  \resumeSubHeadingListEnd
+  \vspace{-2pt}
+\vspace{3pt}
+
+%-----------FOREIGN LANGUAGES-----------------
+\section{\textcolor{darkblue}{\textbf{FOREIGN LANGUAGES}}}
+\begin{tabular*}{\textwidth}{l@{\extracolsep{\fill}}r@{\hspace{6pt}}}
+  \detailsize\textbf{TOEIC (Listening and Reading) 825/990} & \detailsize 08/2023\\
+\end{tabular*}
+
+\vspace{2pt}
+
+%-----------SKILLS-----------------
+\section{\textcolor{darkblue}{\textbf{SKILLS}}}
+  \resumeSubHeadingListStart
+    \resumeSubItem{Back-end}{~~~~~~~Maven, Java , Spring Boot, Hibernate, JPA, Spring Security, OAuth 2.0 Resource Server}
+    \resumeSubItem{Front-end}{~~~~~...}
+    \resumeSubItem{Database}{~~MySQL, PostgreSQL, H2}
+    \resumeSubItem{Others}{~~~~~Technical Portfolio: \href{https://github.com/gavin0100/dev-documentation}{github/gavin0100/dev-documentation}}
+    \item[] ~~~~~~~~~~~~~~~~~~~\detailsize Keycloak, Nimbus JOSE JWT, OpenSearch, Git, Scrum, ELK Stack.
+    \vspace{-5pt}
+    \item[] ~~~~~~~~~~~~~~~~~~~\detailsize Redis, MinIO, Docker.
+  \resumeSubHeadingListEnd
+\vspace{-5pt}
+
+%------------------EXPERIENCE--------------------------
+\section{\textcolor{darkblue}{\textbf{EXPERIENCE}}}
+
+% Company row: name+role on left, date on right
+\expHeading{TMA -- Java Backend Developer}{2024 -- present}
+
+% Project header
+\projectHeading{: Population Registry \& Identity Management System \normalfont(Role: Backend Developer, Team size: 7)}
+
+\begin{itemize}[leftmargin=24pt, itemsep=2pt, topsep=2pt]
+  \expSubHeader{Description:} Built a microservices-based population registry and identity management platform implementing the OSIA specification. Managed person and biographic identity records, unique ID generation, audit logging, and event-driven notifications for identity services.
+
+  \expSubHeader{Technologies:}
+  \begin{itemize}[leftmargin=16pt, itemsep=0pt, topsep=2pt]
+    \expDetail{Back-end: Maven, Spring Boot 3, JPA, Hibernate }
+    \expDetail{Database: PostgreSQL, H2}
+    \expDetail{Search engine: OpenSearch}
+    \expDetail{Message Broker: RabbitMQ, Kafka}
+    \expDetail{Security: Keycloak, Spring Security, OAuth 2.0 Resource Server, Nimbus JOSE JWT (JWE encryption, JWS integrity verification)}
+  \end{itemize}
+
+  \expSubHeader{Responsibilities:}
+  \begin{itemize}[leftmargin=16pt, itemsep=0pt, topsep=2pt]
+    \expDetail{Designed and implemented backend workflows for core features, including search, audit logging, and security-related services}
+    \expDetail{Maintained and optimized backend systems and database performance, identifying and resolving bottlenecks}
+    \expDetail{Defined and built reusable feature skeletons and coding patterns to support maintainability, scalability, and consistent development across services}
+    \expDetail{Developed and extended a plugin-based architecture for system components, enabling flexible integration and future extensions}
+  \end{itemize}
+\end{itemize}
+
+% Project header
+\projectHeading{: Import Registration Management System \normalfont(Role: Technical Lead, Team size: 5)}
+\begin{itemize}[leftmargin=24pt, itemsep=2pt, topsep=2pt]
+  \expSubHeader{Description:} Built the backend for an import registration system handling vehicle and driver data across multiple distribution centers, replacing manual workflows with automated processing.
+  \expSubHeader{Technologies:}
+  \begin{itemize}[leftmargin=16pt, itemsep=0pt, topsep=2pt]
+    \expDetail{Back-end:} Maven, Java 21, Spring Boot 3.x, Firebase, Google Cloud Text-to-Speech
+    \expDetail{Database:} MySQL 8.x, Hibernate 6.x, Flyway
+    \expDetail{Security:} Spring Security 6.x, Stateless JWT, BCrypt, role-based access control
+    \expDetail{Others:} Docker, Jenkins CI/CD, WebSocket/STOMP
+  \end{itemize}
+  \expSubHeader{Responsibilities:}
+  \begin{itemize}[leftmargin=16pt, itemsep=0pt, topsep=2pt]
+    \expDetail{Built and maintained backend workflows for core features — data management, notifications, real-time updates, and security}
+    \expDetail{Resolved backend and database performance issues, including query bottlenecks and slow response times}
+    \expDetail{Established reusable feature scaffolding and coding conventions to keep the codebase consistent and easier to extend, following the senior developer's technical direction}
+  \end{itemize}
+\end{itemize}
+
+% Project header
+\projectHeading{: Multi-Tenant Financial Advisory \& Tax Collaboration Platform \normalfont(Role: Full Stack Developer, Team size: 10)}
+
+\begin{itemize}[leftmargin=24pt, itemsep=2pt, topsep=2pt]
+  \expSubHeader{Description:} A cloud-native B2B SaaS platform connecting tax advisors and business owners in a single portal. It aggregates accounting data (DATEV), open-banking transactions, and financial documents.
+
+  \expSubHeader{Technologies:}
+  \begin{itemize}[leftmargin=16pt, itemsep=0pt, topsep=2pt]
+    \expDetail{Back-end: Java 25, Spring Boot, Spring Modulith, Spring Security, Spring WebSocket, JPA/Hibernate, Liquibase, Camunda BPM}
+    \expDetail{Front-end: Angular 18 (Signals, Standalone Components), TypeScript, NgRx, RxJS, Tailwind CSS, STOMP/WebSocket}
+    \expDetail{Infrastructure \& DevOps: Traefik, nginx, PostgreSQL, Keycloak, HashiCorp Vault, Mailpit, SeaweedFS, Collabora, Matrix Synapse, MockServer, GitLab CI}
+  \end{itemize}
+
+  \expSubHeader{Responsibilities:}
+  \begin{itemize}[leftmargin=16pt, itemsep=0pt, topsep=2pt]
+    \expDetail{Developed real-time chat and collaborative document editing capabilities}
+    \expDetail{Built responsive, high-quality UX/UI with Angular Signals standalone components}
+    \expDetail{Optimized application performance on backend and database}
+    \expDetail{Implemented secured Spring Boot REST APIs with Keycloak OAuth2/OIDC and Vault, and maintained GitLab CI pipelines}
+  \end{itemize}
+\end{itemize}
+
+% Company row: name+role on left, date on right
+\expHeading{TMA -- Java Backend Developer}{10/2024 -- present}
+
+% Project header
+\projectHeading{: Import System \normalfont(Role: Backend Developer, Team size: 5)}
+
+\begin{itemize}[leftmargin=24pt, itemsep=2pt, topsep=2pt]
+  \expSubHeader{Description:} ...
+
+  \expSubHeader{Technologies:}
+  \begin{itemize}[leftmargin=16pt, itemsep=0pt, topsep=2pt]
+    \expDetail{...}
+    \expDetail{...}
+  \end{itemize}
+
+  \expSubHeader{Responsibilities:}
+  \begin{itemize}[leftmargin=16pt, itemsep=0pt, topsep=2pt]
+    \expDetail{...}
+    \expDetail{...}
+  \end{itemize}
+\end{itemize}
+
+% Company row: name+role on left, date on right
+\expHeading{FPT SOFTWARE ACADEMY HCM -- Internship Full Stack Developer}{09/2023 -- 11/2023}
+
+% Project header
+\projectHeading{: Fresher Academy management system \normalfont(Team size: 5)}
+\end{document}
