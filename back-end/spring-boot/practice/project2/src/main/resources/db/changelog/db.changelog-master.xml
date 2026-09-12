@@ -20,4 +20,6 @@
     <include file="db/changelog/changes/V9__create_tags_and_product_tags.sql"/>
     <!-- Idempotency-Key store for retried POSTs - see docs/interview/rest-api/04-idempotency-in-rest-apis.md#the-store -->
     <include file="db/changelog/changes/V10__create_idempotency_records.sql"/>
+    <!-- Indexes behind the allowed sort properties - see docs/interview/rest-api/05-pagination-and-sorting.md#guarding-the-sort -->
+    <include file="db/changelog/changes/V11__add_product_sort_indexes.sql"/>
 </databaseChangeLog>

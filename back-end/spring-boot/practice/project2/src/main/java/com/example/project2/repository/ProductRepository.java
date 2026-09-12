@@ -1,10 +1,12 @@
 package com.example.project2.repository;
 
 import com.example.project2.dto.response.ProductSearchResultResponse;
+import com.example.project2.dto.response.ProductSummaryResponse;
 import com.example.project2.entity.Product;
 import com.example.project2.repository.projection.ProductSearchProjection;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Slice;
 import org.springframework.data.jpa.repository.EntityGraph;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
@@ -30,6 +32,39 @@ public interface ProductRepository extends JpaRepository<Product, Long>, Product
     @Override
     @EntityGraph(attributePaths = "category")
     Page<Product> findAll(Pageable pageable);
+
+    /**
+     * Interview topic: docs/interview/rest-api/05-pagination-and-sorting.md#paged-endpoint
+     * A page of the catalog list. Spring Data appends the Pageable sort as "order by p.<property>",
+     * so the client controls the ORDER BY and this query text never mentions one.
+     *
+     * <p>The countQuery is written out by hand because Hibernate cannot derive a count from a
+     * "select new ..." query.
+     */
+    @Query(value = """
+            select new com.example.project2.dto.response.ProductSummaryResponse(
+                p.id, p.name, p.brand, p.price, p.stockQuantity)
+            from Product p
+            """,
+            countQuery = "select count(p) from Product p")
+    Page<ProductSummaryResponse> findSummaries(Pageable pageable);
+
+    /**
+     * Interview topic: docs/interview/rest-api/05-pagination-and-sorting.md#slice-and-cursor-based-pagination
+     * Keyset paging: the client sends the last id it saw instead of a page number, so the database
+     * seeks straight into the primary key instead of counting rows it then throws away.
+     *
+     * <p>Returning a Slice means no count query runs, which is the expensive half of a Page over
+     * ~1M rows. Call it with an unsorted Pageable.ofSize(n); the order by here is the cursor order.
+     */
+    @Query("""
+            select new com.example.project2.dto.response.ProductSummaryResponse(
+                p.id, p.name, p.brand, p.price, p.stockQuantity)
+            from Product p
+            where :afterId is null or p.id > :afterId
+            order by p.id
+            """)
+    Slice<ProductSummaryResponse> findSummariesAfterId(@Param("afterId") Long afterId, Pageable pageable);
 
     Optional<Product> findBySku(String sku);
 
