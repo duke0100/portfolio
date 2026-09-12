@@ -45,6 +45,7 @@ docs/interview/
 | 01 | [How do you design a versioned REST API in Spring Boot?](rest-api/01-rest-api-versioning.md) | [project2](../../project2) |
 | 02 | [What is the difference between @RequestBody and @ModelAttribute?](rest-api/02-request-body-vs-model-attribute.md) | [project2](../../project2) |
 | 03 | [How would you implement global exception handling in Spring Boot REST APIs?](rest-api/03-global-exception-handling.md) | [project2](../../project2) |
+| 04 | [Explain idempotency in REST APIs. Which HTTP methods are idempotent and why does it matter?](rest-api/04-idempotency-in-rest-apis.md) | [project2](../../project2) |
 
 ### spring-boot
 

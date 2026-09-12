@@ -18,4 +18,6 @@
     <include file="db/changelog/changes/V8__create_product_reviews.sql"/>
     <!-- Join table for a many-to-many - see docs/interview/spring-data-jpa/03-jpa-relationship-annotations.md#jointable-many-to-many -->
     <include file="db/changelog/changes/V9__create_tags_and_product_tags.sql"/>
+    <!-- Idempotency-Key store for retried POSTs - see docs/interview/rest-api/04-idempotency-in-rest-apis.md#the-store -->
+    <include file="db/changelog/changes/V10__create_idempotency_records.sql"/>
 </databaseChangeLog>

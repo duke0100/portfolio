@@ -2,6 +2,7 @@ package com.example.project2.service.impl;
 
 import com.example.commonlib.exception.BusinessException;
 import com.example.project2.dto.request.CreateOrderRequest;
+import com.example.project2.dto.request.ReplaceShippingAddressRequest;
 import com.example.project2.dto.request.UpdateOrderRequest;
 import com.example.project2.dto.response.CategoryUserRevenueResponse;
 import com.example.project2.dto.response.OrderDetailReportResponse;
@@ -158,6 +159,25 @@ public class OrderServiceImpl implements OrderService {
         return toResponse(saved);
     }
 
+    /**
+     * Interview topic: docs/interview/rest-api/04-idempotency-in-rest-apis.md#put-and-delete
+     * The state after this call depends only on the request body, never on the state before it,
+     * so a retried PUT is harmless.
+     */
+    @Override
+    public OrderResponse replaceAddresses(Long id, ReplaceShippingAddressRequest request) {
+        log.debug("Replacing addresses on order id: {}", id);
+        Order order = orderRepository.findById(id)
+                .orElseThrow(() -> BusinessException.notFound("Order not found with id: " + id));
+
+        order.setShippingAddress(request.getShippingAddress());
+        order.setBillingAddress(request.getBillingAddress());
+
+        Order saved = orderRepository.save(order);
+        log.info("Replaced addresses on order id: {}", saved.getId());
+        return toResponse(saved);
+    }
+
     @Override
     public void delete(Long id) {
         log.debug("Deleting order with id: {}", id);
@@ -166,6 +186,23 @@ public class OrderServiceImpl implements OrderService {
         }
         orderRepository.deleteById(id);
         log.info("Deleted order with id: {}", id);
+    }
+
+    /**
+     * Interview topic: docs/interview/rest-api/04-idempotency-in-rest-apis.md#put-and-delete
+     * Returns false instead of throwing when the order is already gone - the caller turns that into
+     * the same 204 the first DELETE returned.
+     */
+    @Override
+    public boolean deleteIfExists(Long id) {
+        log.debug("Deleting order if present, id: {}", id);
+        if (!orderRepository.existsById(id)) {
+            log.debug("Order {} already deleted, nothing to do", id);
+            return false;
+        }
+        orderRepository.deleteById(id);
+        log.info("Deleted order with id: {}", id);
+        return true;
     }
 
     @Override
