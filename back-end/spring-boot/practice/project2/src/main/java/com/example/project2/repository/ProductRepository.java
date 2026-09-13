@@ -14,6 +14,7 @@ import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Repository;
 
 import java.math.BigDecimal;
+import java.util.List;
 import java.util.Optional;
 
 /**
@@ -65,6 +66,35 @@ public interface ProductRepository extends JpaRepository<Product, Long>, Product
             order by p.id
             """)
     Slice<ProductSummaryResponse> findSummariesAfterId(@Param("afterId") Long afterId, Pageable pageable);
+
+    /**
+     * Interview topic: docs/interview/concurrency/01-callable-vs-runnable.md#callable-fan-out
+     * One of the three queries the snapshot fan-out runs at the same time. Written as JPQL rather
+     * than a derived name so the count happens in the database, not in Java.
+     */
+    @Query("select count(p) from Product p where p.category.id = :categoryId")
+    long countByCategory(@Param("categoryId") Long categoryId);
+
+    /**
+     * Interview topic: docs/interview/concurrency/01-callable-vs-runnable.md#callable-fan-out
+     * Returns null for a category with no products, which the caller turns into 0.00.
+     */
+    @Query("select avg(p.price) from Product p where p.category.id = :categoryId")
+    Double averagePriceByCategory(@Param("categoryId") Long categoryId);
+
+    /**
+     * Interview topic: docs/interview/concurrency/01-callable-vs-runnable.md#callable-fan-out
+     * Bounded by the Pageable, so one category with a million rows still returns a short list.
+     */
+    @Query("""
+            select new com.example.project2.dto.response.ProductSummaryResponse(
+                p.id, p.name, p.brand, p.price, p.stockQuantity)
+            from Product p
+            where p.category.id = :categoryId
+              and p.stockQuantity <= p.lowStockThreshold
+            order by p.stockQuantity asc, p.id asc
+            """)
+    List<ProductSummaryResponse> findLowStockByCategory(@Param("categoryId") Long categoryId, Pageable pageable);
 
     Optional<Product> findBySku(String sku);
 

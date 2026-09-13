@@ -32,6 +32,12 @@ docs/interview/
 |---|---|---|
 | 01 | [Spring Modulith: how do you structure a modular monolith in Spring Boot?](architecture/01-spring-modulith-modular-monolith.md) | [project2](../../project2) |
 
+### concurrency
+
+| # | Topic | Applied in |
+|---|---|---|
+| 01 | [What is the difference between Callable and Runnable? When would you prefer one over the other?](concurrency/01-callable-vs-runnable.md) | [project2](../../project2) |
+
 ### database
 
 | # | Topic | Applied in |
