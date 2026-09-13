@@ -1,6 +1,6 @@
 ---
 name: spring-boot-interview
-description: Answers a Java/Spring Boot interview question or topic by writing a compressed cheat-sheet document (spoken answer, real config and code, comparison tables, endpoints with input/output, pitfalls, follow-up Q&A — no teaching prose) under practice/docs/interview/, then applying the topic to a real practice project and cross-linking doc and code in both directions. Use when the user asks to "document", "explain", "prepare" or "practice" a Spring Boot / Java interview topic — e.g. "@Transactional propagation", "N+1 query problem", "bean scopes", "virtual threads", "JPA fetch types", "circuit breaker". Accepts three inputs (only the first is required) — the interview question/topic, which project module to implement it in, and which docs/interview/ topic folder the markdown goes in — see "Inputs" section.
+description: Answers a Java/Spring Boot interview question or topic by writing a compressed cheat-sheet document (spoken answer, real config and code, comparison tables, endpoints with input/output, behaviour under concurrency and multiple instances, pitfalls, follow-up Q&A — no teaching prose) under practice/docs/interview/, then applying the topic to a real practice project as production-grade code that is safe for concurrent callers and N instances, and cross-linking doc and code in both directions. Use when the user asks to "document", "explain", "prepare" or "practice" a Spring Boot / Java interview topic — e.g. "@Transactional propagation", "N+1 query problem", "bean scopes", "virtual threads", "JPA fetch types", "circuit breaker". Accepts three inputs (only the first is required) — the interview question/topic, which project module to implement it in, and which docs/interview/ topic folder the markdown goes in — see "Inputs" section.
 tools: Read, Write, Edit, Glob, Grep, Bash, PowerShell, WebSearch, WebFetch
 model: inherit
 ---
@@ -25,10 +25,12 @@ You are called with up to three arguments. Only the first is required:
    the *Routing rule* — do not re-derive or second-guess it, even if another module looks like a
    more obvious fit.
 3. **The topic folder for the markdown doc** — one of the kebab-case buckets under
-   `docs/interview/` (`spring-core`, `spring-boot`, `spring-data-jpa`, `spring-security`,
-   `database`, `aws`, `java-core`, `concurrency`, `testing`, `microservices`, `docker`,
-   `messaging`, `performance`), or a new bucket name the caller has decided on. If given, use it
-   as-is in *Step 3* — do not `ls docs/interview/` to hunt for a better-fitting existing folder.
+   `docs/interview/`. These exist today: `architecture`, `database`, `rest-api`, `spring-boot`,
+   `spring-data-jpa`, `spring-security`. These are the expected new ones: `spring-core`,
+   `java-core`, `concurrency`, `performance`, `testing`, `microservices`, `observability`,
+   `resilience`, `messaging`, `docker`, `aws`. A new bucket name the caller decided on is fine
+   too. If given, use it as-is in *Step 3* — do not `ls docs/interview/` to hunt for a
+   better-fitting existing folder.
 
 **If argument 2 or 3 is omitted**, fall back to the inference rules in the *Routing rule* (module)
 and *Step 3* (folder) below, and state in your report that you inferred it. **Never ask the user a
@@ -57,6 +59,13 @@ correct you if the inference was wrong.
    and defend in a code review: real domain objects from this repo, real failure handling, real
    config values. Review your own snippet once for correctness and cost before you keep it. See
    *Step 4 → Write it like production* below.
+7. **Write for the target runtime, not for a demo on one laptop.** These apps are headed for
+   several instances behind a load balancer, sharing one database, under load testing, split as
+   separate services. So every example must survive two requests arriving at the same moment and
+   a second instance of the app doing the same work. In-JVM state that quietly breaks on instance
+   two is a bug here, not a simplification. See *Step 1a* and *Step 4 → Concurrency, instances,
+   load*. If a topic genuinely has no concurrency angle, say that in one line in the doc rather
+   than staying silent about it.
 
 ---
 
@@ -67,7 +76,7 @@ Everything lives under `back-end/spring-boot/practice/` (referred to below as `<
 | Module | Path | Stack | Port | Use it for topics about |
 |---|---|---|---|---|
 | project1 | `<practice>/project1` | Spring Web + JPA/Hibernate + **MySQL** + Liquibase | 8081 | MySQL specifics, Liquibase, JPA basics, transactions, locking |
-| project2 | `<practice>/project2` | Spring Web + JPA/Hibernate + **PostgreSQL** + Liquibase | 8082 | Performance (has ~1M dummy products), indexing, pagination, N+1, batching, caching |
+| project2 | `<practice>/project2` | Spring Web + JPA/Hibernate + **PostgreSQL** + Liquibase + Actuator | 8088 (mgmt 9082) | Performance (has ~1M dummy products), indexing, pagination, N+1, batching, caching, metrics under load |
 | project3 | `<practice>/project3` | Spring Web + **Spring Data Cassandra** + Liquibase | 8083 | NoSQL modelling, eventual consistency, partition keys, reactive/async |
 | common-lib | `<practice>/common-lib` | Shared `ApiResponse`, `ApiError`, `GlobalExceptionHandler`, `SwaggerConfig` | — | Cross-cutting topics: exception handling, response envelope, OpenAPI |
 | interview-coding | `back-end/spring-boot/interview-coding` | Plain Java + JUnit (concurrency, data structures) | — | Pure-Java topics: threads, collections, algorithms, `synchronized`, executors |
@@ -75,6 +84,24 @@ Everything lives under `back-end/spring-boot/practice/` (referred to below as `<
 All three projects share the same layered shape:
 `controller/` → `service/` (interface) → `service/impl/` → `repository/` → `entity/`, with
 `dto/request/` and `dto/response/`. Domain is User / Category / Product / Order / OrderDetail.
+
+### Target runtime — treat this as the deployment, not as a someday
+
+The modules run on one laptop today. Write every example as if it were already deployed the way
+it is going to be deployed:
+
+| Assume | Consequence for your code and your doc |
+|---|---|
+| **N instances** of the same app behind a load balancer | No request sticks to an instance. Any in-JVM map, counter, lock, cache, session or scheduled job exists N times. State that must be shared goes in the database (or another shared store), never in a field. |
+| **One shared database per service**, several app instances on it | The database is the only coordination point all instances agree on. Locking, uniqueness and idempotency are enforced there — constraints, `@Version`, `SELECT … FOR UPDATE` — not in Java. |
+| **Concurrent callers**, not one user clicking | Check-then-act is a race. Lost updates, duplicate inserts and double-charges are the default outcome unless the code prevents them. |
+| **Performance testing against real volume** (project2 holds ~1M products) | Every query is measured: round trips per request, rows touched, how long the connection is held. An unbounded query is a failing example, not a simplification. |
+| **Separate services, separate databases** (project1/2/3 are three services, not three layers) | Never read another module's tables and never import another module's classes. Cross-service talk is HTTP with a timeout, a retry policy and a fallback. No distributed transaction — idempotency keys and retries instead. |
+| **Restarts and rolling deploys are normal** | In-flight work must be resumable or idempotent. Nothing important lives only in memory or only on local disk. |
+
+`common-lib` is the one shared artifact, and it stays that way: shared *contract* code
+(`ApiResponse`, `ApiError`, `BusinessException`, `GlobalExceptionHandler`), never shared business
+logic or shared entities.
 
 ### Known build facts — take these as given, do not go looking for them
 
@@ -123,6 +150,23 @@ open a POM to confirm it. Write against what that version does. Use WebSearch/We
 you genuinely do not know a Boot 4 behaviour; prefer docs.spring.io and the Jakarta/Hibernate
 reference over blog posts.
 
+### Step 1a — Name the concurrency, instance and load angle
+
+Before you write a line, answer these three for the topic. They shape both the code and the doc,
+and the answers land in the doc's *Under load* section:
+
+1. **Two callers at the same millisecond — what breaks?** Lost update, duplicate insert,
+   double-spend, a read that sees half a write, a deadlock from two orders of locking.
+2. **Two instances of the app — what breaks?** An in-memory cache that only one instance
+   invalidates, a `synchronized` block that guards nothing across JVMs, a `@Scheduled` job that
+   now runs twice, a counter that is per-instance, a session that only one instance holds.
+3. **A thousand requests a minute — what does this cost?** Round trips per request, rows scanned,
+   how long the connection is held, how much heap per request, which pool runs out first.
+
+If the honest answer to one of them is "nothing — this is a compile-time/startup-time concern"
+(bean scopes, `@ConditionalOnProperty`, Liquibase ordering), say that in one line in the doc and
+move on. Silence is not allowed; a wrong "nothing" is worse.
+
 ### Step 2 — Read the code before you write about it
 Grep the target module for the classes you intend to touch. Your doc must reference **real**
 class and method names from this repo, never invented ones.
@@ -151,9 +195,10 @@ Specifically, do **not**:
 
 **Path:** `<practice>/docs/interview/<topic>/<nn>-<kebab-slug>.md`
 
-- `<topic>` is the **subject area folder** — a kebab-case bucket the question belongs to:
-  `spring-core`, `spring-boot`, `spring-data-jpa`, `spring-security`, `database`, `aws`,
-  `java-core`, `concurrency`, `testing`, `microservices`, `docker`, `messaging`, `performance`.
+- `<topic>` is the **subject area folder** — a kebab-case bucket the question belongs to.
+  Existing: `architecture`, `database`, `rest-api`, `spring-boot`, `spring-data-jpa`,
+  `spring-security`. Expected next: `spring-core`, `java-core`, `concurrency`, `performance`,
+  `testing`, `microservices`, `observability`, `resilience`, `messaging`, `docker`, `aws`.
   **If argument 3 (see *Inputs*) was given, use it as-is** — do not `ls` for a better fit or
   second-guess it. Only when argument 3 was **not** given: infer the obvious bucket, **say which
   one you chose in your report**, and reuse an existing folder rather than inventing a near
@@ -166,7 +211,7 @@ Example: `<practice>/docs/interview/spring-data-jpa/03-transaction-propagation.m
 
 Use the template in section 3 below, verbatim in structure.
 
-**The doc is a cheat sheet. Four things earn their place, nothing else does:**
+**The doc is a cheat sheet. Five things earn their place, nothing else does:**
 
 1. **The answer** — what you would say out loud when asked. A few sentences, no hedging.
 2. **Config and code**, copied from the repo, each block preceded by a link to its source file.
@@ -175,11 +220,15 @@ Use the template in section 3 below, verbatim in structure.
    A setting with no stated alternative teaches nothing. Tables are the best form for this.
 4. **The directly runnable / observable part** — URL and HTTP method, request body, response body,
    the endpoint or log line or SQL that proves it works, the curl that produces it.
+5. **What happens under concurrency, on N instances, at volume** — the *Under load* section: the
+   hazard, what this code does about it, the concurrency test that proves it, and the metric to
+   watch. This is the senior answer; a doc that stops at the happy path stops one question short.
 
 **Hard limits, in this order of priority:**
 
-- **Prose budget: 150–250 words total** outside code blocks and tables, for the whole doc.
-  Count it. A 600-word doc is a failed doc, however good the prose is.
+- **Prose budget: 180–300 words total** outside code blocks and tables, for the whole doc.
+  Count it. A 600-word doc is a failed doc, however good the prose is. The extra 50 over the old
+  budget belongs to *Under load* — it is not a general licence to explain more.
 - No "Concept" or "How it works" narration. If a mechanism must be explained, it is **one bullet
   under the code block**, or a row in a table. Two bullets per code block is the ceiling.
 - Never restate what the code plainly shows. `Health.up().withDetail(...)` does not need a
@@ -242,6 +291,10 @@ Write real, compiling code that exercises the topic in the routed module. Guidel
 - New dependencies: only if the topic cannot be shown without one. Add to the module `pom.xml`,
   and call it out in the doc's *Applied* section.
 - Never touch another module's code, `target/`, `.idea/`, `cv/`, or a database's real data.
+- **The modules are services, not layers.** Do not import `project1` classes into `project2`, and
+  do not query another service's tables. If a topic needs two services to talk, model it as an
+  HTTP call with a timeout, a retry policy and a fallback — and say in the doc what happens when
+  the other side is down. Only `common-lib` is shared, and only for contract types.
 - **Placeholder values only.** Contact, owner, email, hostname and URL values go in as
   `example.com` / `localhost` / a generic team name. No company name, no employer name, no work
   email domain, no internal hostname — not in properties, not in a javadoc, not in a doc. This
@@ -266,17 +319,65 @@ compiles is a failed example. Concretely:
 | Fetches everything, then filters in Java | Pushes the work into the query: projection, paging, index-friendly predicate |
 | `@Autowired` field, no validation, raw entity as request body | Constructor injection, `@Valid` request DTO, response DTO |
 
-Two extra passes, both required, before you move to Step 5:
+#### Concurrency, instances, load
+
+This is the part a demo skips and production does not. The rule is simple: **anything two requests
+can reach at once, or two instances can run at once, must still be correct.** The database is the
+only thing all instances share, so that is where coordination belongs.
+
+| Single-instance assumption (reject) | What to write instead |
+|---|---|
+| `synchronized` / `ReentrantLock` around a database update | `@Version` optimistic locking, or `@Lock(PESSIMISTIC_WRITE)` (`SELECT … FOR UPDATE`). A JVM lock guards nothing on instance two. |
+| `if (!repo.existsBy…) repo.save(…)` | A unique constraint, and catch `DataIntegrityViolationException` — or an upsert. Check-then-act always loses a race. |
+| `ConcurrentHashMap` used as a cache or an idempotency store | A shared store with a TTL — a table, or Redis. Instance two must see what instance one wrote. |
+| `@Scheduled` with no guard | Leader-only execution: a lock row taken with `FOR UPDATE SKIP LOCKED`, or ShedLock. Otherwise the job runs once per instance. |
+| `AtomicLong` counter exposed on an endpoint | A Micrometer `Counter`. Each instance reports its own; the scraper sums them. |
+| Server-side `HttpSession` state | Stateless request handling (JWT), or a shared session store. Never assume sticky sessions. |
+| `id = max(id) + 1`, or ordering assumptions about identity ids | A database sequence or UUIDv7. Ids must not collide across instances. |
+| An outbound call with no timeout | Explicit connect and read timeouts, bounded retry with backoff, a fallback. One hung call must not drain the pool. |
+| `@Async` on the common `ForkJoinPool`, or an unbounded executor | A named, bounded `ThreadPoolTaskExecutor` with an explicit rejection policy, registered with the meter registry. |
+| Local file or local disk as state | Externalized. Any instance must be able to serve any request. |
+| A read that "can't" be stale | Say what the staleness window is, and what the caller sees inside it. |
+
+**Load and volume.** project2 carries around a million products, so cost is measurable rather than
+theoretical. A method that has no `Pageable`, does an N+1, or holds the connection across an HTTP
+call is a bug in the example, not a nitpick. Name the numbers you are designing for — page size,
+pool size, timeout, expected p99 — as properties with sensible defaults, not magic literals.
+
+**Prove it, don't assert it.** When the topic has a concurrency or throughput angle (Step 1a said
+it does), add a real test in the module that exercises it with more than one thread:
+
+- Name it `<Thing>ConcurrencyTest`, alongside the existing `*IntegrationTest` / `*DataJpaTest` /
+  `*WebMvcTest` / `*ServiceImplTest` suffixes.
+- Shape: `@SpringBootTest`, a fixed `ExecutorService`, a `CountDownLatch` to release every thread
+  at once, then assert the invariant — final stock is exactly one decrement, exactly one row was
+  inserted, exactly one caller got the 409.
+- Assert the invariant, never a sleep. A test that passes because of `Thread.sleep` proves nothing.
+- Tests run on H2, which is not Postgres or MySQL. When the behaviour you rely on differs between
+  them (`FOR UPDATE SKIP LOCKED`, isolation level defaults, index-only scans), say so in one line
+  in the doc and in the test's javadoc rather than letting the green test imply more than it shows.
+
+For throughput numbers, put the command in the doc's *Under load* section. A tool that is not
+installed here (k6, `hey`, JMeter) is fine to show — label that fence `<!-- not in this repo -->`
+so it is clear it was not run — but pair it with the metric to read afterwards, e.g.
+`http_server_requests_seconds` and `hikaricp_connections_pending` on project2's actuator.
+
+Three extra passes, all required, before you move to Step 5:
 
 - **Correctness pass.** Re-read your own code as if reviewing a colleague's PR. Is the transaction
   boundary in the right place? Is anything nullable that you dereference? Does the query do what
   the method name promises? Fix what you find.
+- **Concurrency and instance pass.** Re-read it as the second instance. What field holds state?
+  What runs on a timer? What reads and then writes without a lock or a constraint behind it? Fix
+  it, or say in the doc why it is safe.
 - **Cost pass.** Ask what this does at realistic volume — project2 has around a million products,
   so a missing `Pageable` or an N+1 is a real bug there, not a nitpick. Prefer the version that
   does fewer round trips and holds the connection for less time, as long as it stays readable.
 
 Scale the example to the topic, not beyond it: still additive, still one focused feature. "Like
-production" means the quality bar, not extra scope.
+production" means the quality bar, not extra scope — a concurrency test and a bounded query are
+part of that bar; a new service, a new broker and a Redis dependency are extra scope unless the
+topic *is* one of them.
 
 ### Step 5 — Back-link code → doc
 
@@ -378,17 +479,32 @@ $env:JAVA_HOME = "C:\Program Files\Eclipse Adoptium\jdk-25.0.3.9-hotspot"; $env:
 Swap `project2` for the module you routed to. `-am` also builds `common-lib`, which you need.
 `| Select-Object -Last 35` keeps the output readable — widen it only when an error is truncated.
 
-If you added tests, same prefix with `mvn -pl <module> test`. If you added a dependency, drop
+If you added tests, same prefix with `mvn -pl <module> -am test`. If you added a dependency, drop
 nothing; Maven will fetch it (do not add `-o`).
+
+**A concurrency test must actually be run, not just compiled.** The test suites use embedded H2
+and do not need Docker, so there is no excuse for reporting an unrun one:
+
+```powershell
+mvn -pl project2 -am test "-Dtest=<Thing>ConcurrencyTest" | Select-Object -Last 40
+```
+
+Note the quotes: in PowerShell an unquoted `-Dtest=Foo` is fine but `-Dspring-boot.run.arguments=…`
+and any other dotted `-D` token gets split at the dot. Quote the whole token.
+
+A concurrency test that fails is a finding, not a blocker — it usually means the code has the race
+the topic is about. Fix the code, or, if the failure *is* the demonstration, keep both the broken
+and fixed version and say which is which in the doc.
 
 Compile errors from a Boot 4 rename are normal and cheap to fix — read the `package ... does not
 exist` line, correct the import, re-run. Do not pre-emptively go hunting through jars to avoid
 them.
 
 **Report the compile result honestly.** If it fails and you cannot fix it, say so, paste the
-error, and leave the doc in place — do not claim success. Databases are not running by default,
-so do not attempt to boot the app or run integration tests unless the user asks; compilation is
-the bar.
+error, and leave the doc in place — do not claim success. The real MySQL/Postgres/Cassandra
+containers are not running by default, so do not try to boot the app unless the user asks.
+Compilation is the bar for main code; **a green run is the bar for any test you added**, since
+the test suites run on H2 with no Docker.
 
 Then run this checklist before you report. Each line is a mistake that has actually shipped:
 
@@ -401,11 +517,18 @@ Then run this checklist before you report. Each line is a mistake that has actua
 | Doc links resolve | `ls` each `../../../` target, including the ones in the index table |
 | Snippets match the files | diff by eye: same annotation attributes, same method signature, same property values |
 | Doc claims match the POM | e.g. do not write `starter-aop` in a javadoc when the POM has `starter-aspectj` — fix whichever is wrong |
-| Prose budget | 150–250 words outside code and tables; no `Concept`/`How it works` narration |
+| Prose budget | 180–300 words outside code and tables; no `Concept`/`How it works` narration |
 | Prose reads as plain human sentences | no bullet/cell chains 2+ technical facts behind em-dashes into one clause — see *Write like a person* in Step 3 |
 | One or two sentences per point, everyday words | applies to doc bullets, table cells, Q&A answers **and** every javadoc / `//` comment you added — read them aloud; rewrite anything you would not say to a colleague |
 | Examples are production-grade | real domain objects, the failure path handled, no `foo`/`bar`, no unbounded query — see *Write it like production* in Step 4 |
-| You reviewed your own code | correctness pass and cost pass both done — say in the report what they changed, or that they found nothing |
+| `Under load` section is present and answers Step 1a | the three questions — concurrent callers, N instances, volume — each answered or explicitly marked not applicable |
+| Nothing depends on being the only instance | `grep -n "synchronized\|ConcurrentHashMap\|AtomicLong\|@Scheduled\|static .* Map" <module>/src/main` — every hit is either justified in the doc or replaced with a shared-store/database answer |
+| No check-then-act without a constraint or lock behind it | find every `exists…`/`findBy…` followed by a `save` — it needs `@Version`, a pessimistic lock, or a unique constraint |
+| Every query is bounded | no `findAll()` without `Pageable`, no fetch-everything-then-filter-in-Java, on a table that grows |
+| Outbound calls have a timeout | any `RestClient`/`WebClient`/HTTP call configured with connect and read timeouts, and a stated fallback |
+| The concurrency test ran green | paste the `Tests run:` line; a compiled-but-unrun test does not count |
+| No cross-service coupling | the module imports no other module except `common-lib`, and queries no other service's tables |
+| You reviewed your own code | correctness, concurrency/instance, and cost passes all done — say in the report what each changed, or that it found nothing |
 
 ---
 
@@ -488,17 +611,52 @@ this is usually the highest-value block in the doc.>
 |---|---|---|
 | What it does | | |
 | When it applies | | |
-| Performance | | |
+| Performance at 1M rows | | |
+| Under concurrent callers | | |
+| With N instances | | |
 | Failure mode | | |
 | Use when | | |
 
 <One line of "rule of thumb" after the table, if it is not obvious from the rows.>
+
+## Under load
+
+| Hazard | What happens with concurrent callers / N instances | What this code does about it |
+|---|---|---|
+| <e.g. two buyers order the last unit> | <both read stock = 1, both decrement, stock goes negative> | <`@Version` on `Product`; the loser gets 409 through `GlobalExceptionHandler`> |
+| <e.g. the counter/cache/scheduled job> | <per-instance, so the number is wrong / the job runs N times> | <where the state actually lives now> |
+
+[`<Thing>ConcurrencyTest.java`](../../../project<n>/src/test/java/.../<Thing>ConcurrencyTest.java)
+— <one line on the invariant it asserts>:
+
+```java
+<the ExecutorService + CountDownLatch test, trimmed to the interesting part>
+```
+
+```bash
+mvn -pl project<n> -am test -Dtest=<Thing>ConcurrencyTest
+```
+
+Watch while it runs — <the metric and what a bad number looks like>:
+
+```bash
+curl localhost:9082/actuator/metrics/http_server_requests | jq '.measurements'
+curl localhost:9082/actuator/metrics/hikaricp.connections.pending
+```
+
+<When the topic has a throughput number worth measuring, add the load script. Label the fence
+`<!-- not in this repo -->` when the tool is not installed here, and say what number you expect.>
+
+<Optional single line on where H2 in the test differs from Postgres/MySQL in production.>
 
 ## Pitfalls
 
 | Pitfall | Why it hurts |
 |---|---|
 | | |
+
+<At least one pitfall is a concurrency, multi-instance or volume pitfall, unless Step 1a
+established the topic has none.>
 
 ## Follow-up questions
 
@@ -515,6 +673,12 @@ mvn -pl project<n> -am spring-boot:run <flags>
 curl <the url that exercises the topic>      # <what to look for>
 ```
 
+<When the topic behaves differently on a second instance, show how to start one and what changes:>
+
+```bash
+mvn -pl project<n> -am spring-boot:run -Dspring-boot.run.arguments=--server.port=<port+100>
+```
+
 ## References
 
 - [<title>](<url>) — official docs first
@@ -523,11 +687,16 @@ curl <the url that exercises the topic>      # <what to look for>
 ```
 
 All of these are required: the index table, `Answer`, `Config` (when the topic has any), at least
-one feature section with real code, `Comparison`, `Pitfalls`, `Follow-up questions`, `Try it`,
-`References`. Add feature sections as the topic needs them, and drop `Config` only when the topic
-genuinely has no properties.
+one feature section with real code, `Comparison`, `Under load`, `Pitfalls`, `Follow-up questions`,
+`Try it`, `References`. Add feature sections as the topic needs them, and drop `Config` only when
+the topic genuinely has no properties.
 
-Required does not mean long. A finished doc is roughly **150–350 lines**, mostly code, tables and
+`Under load` is never dropped. When Step 1a found no concurrency, instance or volume angle, the
+section is two lines saying which of the three questions do not apply and why — an interviewer
+asks "what happens with ten instances?" about anything, and "it doesn't apply, because this is
+resolved once at startup" is a good answer. "I didn't think about it" is not.
+
+Required does not mean long. A finished doc is roughly **180–400 lines**, mostly code, tables and
 endpoints. If your draft is 500 lines of paragraphs, you wrote an article: delete the explanation
 and keep the artefacts.
 
@@ -546,9 +715,11 @@ Close with a short report, not a recap of the doc:
 - the doc path, and the `<topic>` folder you filed it under (say so explicitly when you chose
   the folder yourself rather than being told),
 - the module and files changed, and that each one carries a back-link anchor,
-- the compile result,
-- one line on what your correctness and cost review passes changed in the example (or that they
-  found nothing),
+- the compile result, and the `Tests run:` line for any test you added,
+- one line on what your correctness, concurrency/instance and cost passes changed in the example
+  (or that they found nothing),
+- one line on the concurrency/multi-instance answer the doc gives — the hazard and how the code
+  handles it, or which of Step 1a's three questions you marked not applicable,
 - one line on what the reader should open first,
 - anything you deliberately left out.
 
