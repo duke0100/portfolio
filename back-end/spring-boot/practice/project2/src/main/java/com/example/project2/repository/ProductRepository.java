@@ -1,5 +1,6 @@
 package com.example.project2.repository;
 
+import com.example.project2.dto.response.PricedProductResponse;
 import com.example.project2.dto.response.ProductSearchResultResponse;
 import com.example.project2.dto.response.ProductSummaryResponse;
 import com.example.project2.entity.Product;
@@ -95,6 +96,37 @@ public interface ProductRepository extends JpaRepository<Product, Long>, Product
             order by p.stockQuantity asc, p.id asc
             """)
     List<ProductSummaryResponse> findLowStockByCategory(@Param("categoryId") Long categoryId, Pageable pageable);
+
+    /**
+     * Interview topic: docs/interview/concurrency/02-completablefuture-vs-future.md#the-pipeline
+     * The first stage of the async pricing pipeline. It projects the six columns the pipeline needs
+     * instead of the whole row, and {@code p.category.id} reads the FK column without joining.
+     */
+    @Query("""
+            select new com.example.project2.dto.response.PricedProductResponse(
+                p.id, p.name, p.brand, p.price, p.weight, p.category.id)
+            from Product p
+            where p.id = :productId
+            """)
+    Optional<PricedProductResponse> findPricingProjection(@Param("productId") Long productId);
+
+    /**
+     * Interview topic: docs/interview/concurrency/02-completablefuture-vs-future.md#the-pipeline
+     * The related-products stage. Bounded by the Pageable, so a category with a million rows still
+     * returns a handful.
+     */
+    @Query("""
+            select new com.example.project2.dto.response.ProductSummaryResponse(
+                p.id, p.name, p.brand, p.price, p.stockQuantity)
+            from Product p
+            where p.category.id = :categoryId
+              and p.id <> :excludeProductId
+              and p.status = 'ACTIVE'
+            order by p.id asc
+            """)
+    List<ProductSummaryResponse> findRelatedByCategory(@Param("categoryId") Long categoryId,
+                                                       @Param("excludeProductId") Long excludeProductId,
+                                                       Pageable pageable);
 
     Optional<Product> findBySku(String sku);
 
