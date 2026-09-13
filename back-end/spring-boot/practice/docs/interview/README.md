@@ -64,6 +64,12 @@ docs/interview/
 | 02 | [Explain the difference between JPQL, Criteria API and native queries. When do you choose each?](spring-data-jpa/02-jpql-criteria-native-queries.md) | [project2](../../project2) |
 | 03 | [Explain the common JPA mapping annotations: @ManyToOne, @OneToMany, @JoinColumn, mappedBy, @JoinTable, @Id, @GeneratedValue, @Enumerated and @Transient](spring-data-jpa/03-jpa-relationship-annotations.md) | [project2](../../project2) |
 
+### spring-security
+
+| # | Topic | Applied in |
+|---|---|---|
+| 01 | [How would you secure a REST API — authentication vs authorization flow?](spring-security/01-securing-rest-api-authn-vs-authz.md) | documentation only (maps to [project2](../../project2)) |
+
 ## Projects available for application
 
 | Module | Stack | Port | Typical topics |
