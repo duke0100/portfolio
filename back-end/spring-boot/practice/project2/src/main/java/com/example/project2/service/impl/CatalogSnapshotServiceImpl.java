@@ -23,6 +23,7 @@ import java.util.Optional;
 import java.util.concurrent.Callable;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.Future;
+import java.util.concurrent.RejectedExecutionException;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.TimeoutException;
 
@@ -47,15 +48,15 @@ public class CatalogSnapshotServiceImpl implements CatalogSnapshotService {
 
     /**
      * Interview topic: docs/interview/concurrency/01-callable-vs-runnable.md#callable-fan-out
-     * Deliberately not {@code @Transactional}: a transaction does not follow a task onto a pool
-     * thread, and the caller would sit on a connection while waiting for three more.
+     * Deliberately not {@code @Transactional}: a transaction lives in a ThreadLocal and does not
+     * follow a task onto another thread. The caller would also sit on a connection while it waits.
      */
     @Override
     public CatalogSnapshotResponse snapshot(Long categoryId) {
         Category category = categoryRepository.findById(categoryId)
                 .orElseThrow(() -> BusinessException.notFound("Category not found with id: " + categoryId));
 
-        // Each Callable opens its own transaction and its own connection on the pool thread.
+        // Each Callable opens its own transaction and its own connection on its own virtual thread.
         Callable<Long> countTask = () -> productRepository.countByCategory(categoryId);
         Callable<BigDecimal> averagePriceTask = () -> {
             Double average = productRepository.averagePriceByCategory(categoryId);
@@ -67,9 +68,18 @@ public class CatalogSnapshotServiceImpl implements CatalogSnapshotService {
         Callable<List<ProductSummaryResponse>> lowStockTask = () ->
                 productRepository.findLowStockByCategory(categoryId, PageRequest.ofSize(properties.getLowStockLimit()));
 
-        Future<Long> countFuture = catalogTaskExecutor.submit(countTask);
-        Future<BigDecimal> averagePriceFuture = catalogTaskExecutor.submit(averagePriceTask);
-        Future<List<ProductSummaryResponse>> lowStockFuture = catalogTaskExecutor.submit(lowStockTask);
+        // A rejection here means the limiter's waiting room is full. Fail fast with 503 instead of
+        // making the caller wait behind work the executor has no room for.
+        Future<Long> countFuture;
+        Future<BigDecimal> averagePriceFuture;
+        Future<List<ProductSummaryResponse>> lowStockFuture;
+        try {
+            countFuture = catalogTaskExecutor.submit(countTask);
+            averagePriceFuture = catalogTaskExecutor.submit(averagePriceTask);
+            lowStockFuture = catalogTaskExecutor.submit(lowStockTask);
+        } catch (RejectedExecutionException e) {
+            throw busy(e);
+        }
 
         // One budget for the whole fan-out, not one per task.
         long deadline = System.nanoTime() + properties.getTimeout().toNanos();
@@ -123,11 +133,26 @@ public class CatalogSnapshotServiceImpl implements CatalogSnapshotService {
 
     /** Keeps the original exception when it already carries a status, so the advice still maps it. */
     private RuntimeException asRuntime(Throwable cause, String part) {
+        // The task gave up waiting for a database slot. That is overload, not a bug, so say 503.
+        if (cause instanceof RejectedExecutionException rejected) {
+            return busy(rejected);
+        }
         if (cause instanceof RuntimeException runtimeCause) {
             return runtimeCause;
         }
         return new BusinessException("Catalog snapshot part '" + part + "' failed: " + cause.getMessage(),
                 HttpStatus.INTERNAL_SERVER_ERROR, "SNAPSHOT_FAILED");
+    }
+
+    /**
+     * Interview topic: docs/interview/concurrency/01-callable-vs-runnable.md#limiting-an-unbounded-executor
+     * Turns a limiter rejection into the 503 that GlobalExceptionHandler renders as an ApiResponse.
+     */
+    private BusinessException busy(RejectedExecutionException cause) {
+        meterRegistry.counter("catalog.snapshot.rejected").increment();
+        log.warn("Catalog snapshot shed load: {}", cause.getMessage());
+        return new BusinessException("Catalog snapshot is busy, retry shortly",
+                HttpStatus.SERVICE_UNAVAILABLE, "SNAPSHOT_BUSY");
     }
 
     /**
