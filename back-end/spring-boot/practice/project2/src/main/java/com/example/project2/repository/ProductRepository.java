@@ -10,11 +10,13 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Slice;
 import org.springframework.data.jpa.repository.EntityGraph;
 import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.data.jpa.repository.Modifying;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Repository;
 
 import java.math.BigDecimal;
+import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Optional;
 
@@ -212,4 +214,31 @@ public interface ProductRepository extends JpaRepository<Product, Long>, Product
                                                      @Param("brand") String brand,
                                                      @Param("minPrice") BigDecimal minPrice,
                                                      Pageable pageable);
+
+    /**
+     * Interview topic: docs/interview/concurrency/03-async-pitfalls.md#the-price-change
+     * Compare-and-set on the price: it only updates while the row still holds {@code expectedPrice}.
+     *
+     * <p>Two editors racing on the same product both pass a read-then-check in Java, so the check
+     * has to be in the WHERE clause. The loser gets 0 rows back and a 409.
+     *
+     * <p>A bulk update bypasses {@code @PreUpdate}, so {@code updatedAt} is set here by hand.
+     * {@code clearAutomatically} then evicts the now-stale Product from the persistence context.
+     *
+     * @return 1 when this caller won the race, 0 when someone else changed the price first
+     */
+    @Modifying(clearAutomatically = true, flushAutomatically = true)
+    @Query("""
+            update Product p
+               set p.price = :newPrice,
+                   p.updatedAt = :changedAt,
+                   p.updatedBy = :changedBy
+             where p.id = :productId
+               and p.price = :expectedPrice
+            """)
+    int updatePriceIfUnchanged(@Param("productId") Long productId,
+                               @Param("expectedPrice") BigDecimal expectedPrice,
+                               @Param("newPrice") BigDecimal newPrice,
+                               @Param("changedBy") String changedBy,
+                               @Param("changedAt") LocalDateTime changedAt);
 }

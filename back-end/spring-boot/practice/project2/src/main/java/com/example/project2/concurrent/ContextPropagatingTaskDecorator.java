@@ -9,6 +9,7 @@ import java.util.Map;
 
 /**
  * Interview topic: docs/interview/concurrency/02-completablefuture-vs-future.md#spring-integration
+ * Interview topic: docs/interview/concurrency/03-async-pitfalls.md#context-propagation
  * (this class is the TaskDecorator code sample in that section)
  *
  * <p>MDC and the current request live in ThreadLocals, and a ThreadLocal does not follow a task

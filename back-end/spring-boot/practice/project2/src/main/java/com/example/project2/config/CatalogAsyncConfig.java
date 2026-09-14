@@ -79,7 +79,10 @@ public class CatalogAsyncConfig implements AsyncConfigurer {
     }
 
     /**
-     * Only fires for {@code @Async void} methods, where there is no future to carry the failure.
+     * Interview topic: docs/interview/concurrency/03-async-pitfalls.md#exception-handling
+     * (this handler is the code sample in that section)
+     *
+     * <p>Only fires for {@code @Async void} methods, where there is no future to carry the failure.
      * A method returning {@code CompletableFuture} fails the future instead, and never lands here.
      */
     @Override

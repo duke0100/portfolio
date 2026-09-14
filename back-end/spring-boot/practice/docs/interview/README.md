@@ -38,6 +38,7 @@ docs/interview/
 |---|---|---|
 | 01 | [What is the difference between Callable and Runnable? When would you prefer one over the other?](concurrency/01-callable-vs-runnable.md) | [project2](../../project2) |
 | 02 | [Explain CompletableFuture and how it differs from Future. Give a chaining example.](concurrency/02-completablefuture-vs-future.md) | [project2](../../project2) |
+| 03 | [What are the common pitfalls when using @Async in Spring?](concurrency/03-async-pitfalls.md) | [project2](../../project2) |
 
 ### database
 

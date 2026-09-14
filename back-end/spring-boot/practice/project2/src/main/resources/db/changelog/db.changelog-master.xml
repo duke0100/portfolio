@@ -22,4 +22,6 @@
     <include file="db/changelog/changes/V10__create_idempotency_records.sql"/>
     <!-- Indexes behind the allowed sort properties - see docs/interview/rest-api/05-pagination-and-sorting.md#guarding-the-sort -->
     <include file="db/changelog/changes/V11__add_product_sort_indexes.sql"/>
+    <!-- Price-audit rows written after commit by an @Async listener - see docs/interview/concurrency/03-async-pitfalls.md#after-commit-listener -->
+    <include file="db/changelog/changes/V12__create_product_price_audits.sql"/>
 </databaseChangeLog>

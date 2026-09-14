@@ -34,6 +34,20 @@ public class CatalogAsyncProperties {
     /** Ids one batch call may ask for. Each id costs five stages, so this caps the fan-out. */
     private int maxBatchSize = 20;
 
+    /**
+     * Interview topic: docs/interview/concurrency/03-async-pitfalls.md#endpoints
+     * Audit rows the history endpoint may return. A product edited daily for years would otherwise
+     * answer with its whole life story.
+     */
+    private int auditHistoryLimit = 20;
+
+    /**
+     * Interview topic: docs/interview/concurrency/03-async-pitfalls.md#self-invocation
+     * How long the dispatch probe waits for the pool before answering 503. It is the only place in
+     * this module that blocks a request thread on an async result, so the wait is kept short.
+     */
+    private Duration probeTimeout = Duration.ofSeconds(2);
+
     private Shipping shipping = new Shipping();
 
     /**
