@@ -55,6 +55,9 @@ public class CatalogAsyncConfig implements AsyncConfigurer {
         executor.setRejectedExecutionHandler(new ThreadPoolExecutor.CallerRunsPolicy());
         // Carries MDC and the request attributes onto the pool thread.
         executor.setTaskDecorator(new ContextPropagatingTaskDecorator());
+        // Shutdown - see docs/interview/spring-boot/04-graceful-shutdown.md#non-web-work
+        // (this pair is the executor code sample there) Finish queued stages on SIGTERM instead of
+        // dropping them, but stop waiting after 10s so we never blow the pod grace period.
         executor.setWaitForTasksToCompleteOnShutdown(true);
         executor.setAwaitTerminationSeconds(SHUTDOWN_WAIT_SECONDS);
         return executor;

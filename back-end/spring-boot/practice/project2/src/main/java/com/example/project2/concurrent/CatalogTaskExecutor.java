@@ -170,6 +170,8 @@ public class CatalogTaskExecutor implements DisposableBean {
 
     /**
      * Interview topic: docs/interview/concurrency/01-callable-vs-runnable.md#under-load
+     * Interview topic: docs/interview/spring-boot/04-graceful-shutdown.md#non-web-work
+     * (this method is the DisposableBean code sample there)
      * Graceful shutdown on a rolling deploy: finish what is running, then stop waiting and
      * interrupt. Without this the JVM would exit with tasks half done.
      */

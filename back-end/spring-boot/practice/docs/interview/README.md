@@ -63,6 +63,7 @@ docs/interview/
 | 01 | [Spring Boot Actuator and which endpoints to expose in production](spring-boot/01-spring-boot-actuator.md) | [project2](../../project2) |
 | 02 | [@SpringBootTest vs @WebMvcTest vs @DataJpaTest vs @Mock/@InjectMocks](spring-boot/02-test-slices-vs-mockito.md) | [project2](../../project2) |
 | 03 | [What is the N+1 query problem and how do you solve it in JPA?](spring-boot/03-n-plus-one-query-problem.md) | [project2](../../project2) |
+| 04 | [How do you handle graceful shutdown in Spring Boot?](spring-boot/04-graceful-shutdown.md) | [project2](../../project2) |
 
 ### spring-data-jpa
 
