@@ -43,6 +43,7 @@ spring.jpa.open-in-view=false
 spring.jpa.properties.hibernate.default_batch_fetch_size=50
 spring.jpa.properties.hibernate.generate_statistics=true
 spring.jpa.properties.hibernate.query.fail_on_pagination_over_collection_fetch=true
+logging.level.com.example.project2=DEBUG
 ```
 
 | Choice | vs the alternative |
@@ -51,6 +52,7 @@ spring.jpa.properties.hibernate.query.fail_on_pagination_over_collection_fetch=t
 | `default_batch_fetch_size=50` | vs Hibernate's default (off): if a fetch is missed, this caps the damage at about N/50 extra queries instead of N — it never makes a query worse |
 | `generate_statistics=true` | vs `false`: turns on the statement counters this demo relies on, for a small performance cost |
 | `fail_on_pagination_over_collection_fetch=true` | vs Hibernate's default (`false`): pairing `join fetch` with pagination now throws an exception right away, instead of silently loading the whole table into memory |
+| `logging.level.com.example.project2=DEBUG` | vs Boot's root level (`INFO`): the demo's own `log.debug` lines — which strategy ran, how many statements it cost — actually reach the console. Hibernate stays `OFF` here, so it's one line per call, not one per query |
 
 [`application-dev.properties`](../../../project2/src/main/resources/application-dev.properties)
 — the same knobs set the noisy/unsafe way on purpose:
@@ -59,9 +61,18 @@ spring.jpa.properties.hibernate.query.fail_on_pagination_over_collection_fetch=t
 spring.jpa.show-sql=true
 spring.jpa.properties.hibernate.format_sql=true
 logging.level.org.hibernate.SQL=DEBUG
+logging.level.com.example.project2=DEBUG
 spring.jpa.open-in-view=true
 spring.jpa.properties.hibernate.default_batch_fetch_size=-1
 ```
+
+`logging.level.com.example.project2=DEBUG` is repeated from `application.properties` rather than
+raised here, so the demo's own `log.debug` lines survive in both profiles — under Boot's root
+`INFO` they are dropped and only the JSON counts come back, which reads as "the endpoint did
+nothing". To turn them on somewhere the property isn't set, pass
+`--logging.level.com.example.project2=DEBUG` at startup, or flip it at runtime on a dev instance
+(every endpoint is exposed there): `POST /actuator/loggers/com.example.project2` with
+`{"configuredLevel":"DEBUG"}` on port 8082.
 
 ## Where it happens
 

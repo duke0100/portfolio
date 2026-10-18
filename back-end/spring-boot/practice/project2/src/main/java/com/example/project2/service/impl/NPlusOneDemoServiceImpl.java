@@ -76,7 +76,7 @@ public class NPlusOneDemoServiceImpl implements NPlusOneDemoService {
 
         long statements = statistics.getPrepareStatementCount() - statementsBefore;
         long collections = statistics.getCollectionFetchCount() - collectionsBefore;
-        log.debug("Strategy {} produced {} rows in {} statements", strategy, outcome.orders().size(), statements);
+        log.debug("Strategy {} produced {} rows in  {} statements", strategy, outcome.orders().size(), statements);
 
         return NPlusOneReportResponse.builder()
                 .strategy(strategy.name())
