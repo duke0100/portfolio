@@ -1,0 +1,288 @@
+1. TỔNG QUAN KIẾN TRÚC
+Kiến trúc tổng thể (monolith, microservice, event-driven, CQRS, lambda/kappa architecture)
+Sơ đồ luồng dữ liệu end-to-end: thiết bị → ingestion → transform → storage → dashboard
+Cách phân chia 150+ service theo domain/bounded context
+Service nào là core, supporting, platform, shared
+Monorepo hay polyrepo
+Tech stack từng layer (ngôn ngữ, framework, runtime)
+
+2. MULTI-TENANCY
+Mô hình multi-tenant: shared infrastructure, shared DB, hay isolated per tenant
+Tenant isolation level (network, compute, storage, logical)
+Tenant-aware routing: request đến đúng pipeline của tenant nào
+Tenant configuration management (mỗi tập đoàn có rule transform riêng)
+Tenant-specific schema, plugin, hay rule engine
+Quota & resource limit per tenant
+Tenant onboarding/offboarding flow
+Data segregation & cross-tenant data leak prevention
+
+3. DATA INGESTION & COLLECTION
+Protocol nhận log từ thiết bị (MQTT, AMQP, HTTP, gRPC, TCP/UDP raw, Syslog, SNMP, WebSocket)
+Agent hay collector trên thiết bị (Fluentd, Telegraf, custom agent)
+Ingestion gateway: load balancing, throttling, backpressure
+Schema registry cho các loại thiết bị khác nhau
+Device registration & device management
+Message format: JSON, Protobuf, Avro, custom binary
+Serialization/deserialization strategy
+Handling malformed, duplicate, out-of-order message
+Batch ingestion vs real-time streaming
+Buffering strategy khi downstream chậm (dead letter queue, retry queue)
+4. DATA TRANSFORMATION & PROCESSING
+Pipeline architecture (DAG-based, chain, fan-out/fan-in)
+Rule engine / transformation engine per tenant
+ETL vs ELT approach
+Stream processing framework (Kafka Streams, Flink, Spark Streaming, custom)
+Enrichment: join thêm metadata từ nguồn khác
+Aggregation strategy (time window, tumbling, sliding, session window)
+Normalization: thiết bị khác nhau → schema chung
+Error handling trong pipeline: skip, retry, dead letter
+Backfill / replay strategy khi cần xử lý lại dữ liệu cũ
+Versioning của transformation rule
+5. DESIGN PATTERNS
+CQRS (tách read/write model)
+Event Sourcing
+Saga pattern (orchestration vs choreography)
+Outbox pattern
+Strangler Fig (nếu đang migrate)
+Bulkhead pattern
+Sidecar pattern
+Ambassador pattern
+Gateway Aggregation / Gateway Routing / Gateway Offloading
+Backend for Frontend (BFF)
+Pub/Sub pattern
+Competing Consumers pattern
+Priority Queue pattern
+Pipes and Filters pattern
+Claim Check pattern (message lớn → lưu storage, truyền reference)
+Retry pattern (fixed, exponential backoff, jitter)
+Circuit Breaker pattern
+Strategy pattern (cho tenant-specific transform)
+Factory pattern (tạo processor theo device type)
+Chain of Responsibility (pipeline xử lý)
+Observer pattern
+Builder pattern
+Adapter pattern (chuẩn hóa protocol thiết bị khác nhau)
+Repository pattern
+Unit of Work pattern
+Specification pattern (dynamic query/filter)
+Plugin / Extension pattern (tenant custom logic)
+6. GIAO TIẾP GIỮA CÁC SERVICE
+Synchronous: REST, gRPC, GraphQL
+Asynchronous: message queue (RabbitMQ, Kafka, NATS, Pulsar)
+Request-reply vs fire-and-forget vs publish-subscribe
+Event-driven communication: domain event, integration event
+API Gateway: routing, rate limit, auth, request aggregation
+Service Mesh (Istio, Linkerd): mTLS, traffic management, observability
+Service Discovery (Consul, Eureka, K8s DNS)
+API versioning strategy (URL, header, content negotiation)
+Contract testing (Pact, schema validation)
+Backward/forward compatibility
+gRPC streaming (server-side, client-side, bidirectional)
+Webhook / callback pattern
+Correlation ID / request tracing qua các service
+7. ĐA LUỒNG & CONCURRENCY
+Thread pool configuration (core, max, queue size)
+Async/non-blocking I/O (Reactor, Netty, CompletableFuture, coroutine)
+Reactive programming (WebFlux, RxJava, Project Reactor)
+Fork/Join framework
+Virtual Thread (Java 21+ / Project Loom)
+Producer-Consumer pattern với blocking queue
+Read-Write Lock
+Lock-free data structure (ConcurrentHashMap, AtomicReference, CAS)
+ThreadLocal & context propagation (MDC, tracing context qua async boundary)
+Parallel stream processing / parallel batch
+Backpressure handling trong reactive stream
+Scheduler / ScheduledExecutorService cho periodic task
+Race condition detection & prevention
+Deadlock prevention strategy
+Starvation prevention
+8. DATABASE & STORAGE
+Database per service hay shared database
+SQL: PostgreSQL, MySQL — dùng cho data nào
+NoSQL: MongoDB, Cassandra, DynamoDB — dùng cho data nào
+Time-series DB: InfluxDB, TimescaleDB, ClickHouse — cho metrics/log
+Search engine: Elasticsearch, OpenSearch — cho full-text search, log query
+Object storage: S3, MinIO — cho raw log, file lớn
+In-memory DB: Redis, Memcached
+Data partitioning strategy: range, hash, list, composite
+Sharding strategy: by tenant, by time, by device
+Read replica, write replica
+Connection pooling (HikariCP, PgBouncer)
+Database migration tool (Flyway, Liquibase)
+Data retention policy: TTL, archiving, cold storage
+Hot/warm/cold tiering
+Polyglot persistence: lý do chọn DB nào cho use case nào
+9. CACHING
+Cache layer: application-level, distributed, CDN
+Cache technology: Redis, Memcached, Caffeine, Guava
+Caching strategy: Cache-Aside, Read-Through, Write-Through, Write-Behind, Write-Around
+Cache invalidation: TTL, event-based, manual purge
+Cache key design & namespace per tenant
+Cache stampede prevention (singleflight, lock, probabilistic early expiry)
+Hot key problem & mitigation
+Cache warm-up strategy
+Local cache + distributed cache (multi-level cache / near cache)
+Cache consistency với database
+Cache serialization format
+Cache eviction policy (LRU, LFU, TTL)
+Session cache vs data cache vs computed cache
+10. RATE LIMITING & THROTTLING
+Rate limit algorithm: Token Bucket, Leaky Bucket, Fixed Window, Sliding Window, Sliding Window Log
+Rate limit scope: per tenant, per API key, per IP, per device, per user, global
+Distributed rate limiting (Redis-based, sidecar-based)
+Rate limit response: 429 + Retry-After header
+Adaptive rate limiting (dựa trên system load)
+Quota management per tenant (request/day, data volume/day)
+Backpressure mechanism khi upstream quá tải
+Priority-based throttling (tenant premium vs free)
+Graceful degradation khi hit limit
+11. LOAD BALANCING
+L4 vs L7 load balancing
+Algorithm: Round Robin, Weighted Round Robin, Least Connection, IP Hash, Consistent Hashing
+External LB: Nginx, HAProxy, AWS ALB/NLB, cloud LB
+Internal LB: client-side (Ribbon, gRPC built-in), service mesh
+Health check: liveness, readiness, startup probe
+Session affinity / sticky session (nếu cần)
+Load balancing cho message consumer (partition assignment)
+Geographic load balancing / latency-based routing
+Connection draining khi scale down
+12. LOCKING & CONCURRENCY CONTROL
+Optimistic locking (version number, ETag)
+Pessimistic locking (SELECT FOR UPDATE, DB-level lock)
+Distributed lock: Redis (Redlock), ZooKeeper, etcd
+Lock granularity: row-level, entity-level, tenant-level
+Lock timeout & deadlock detection
+Advisory lock
+Leader election (cho scheduled job, singleton task)
+Compare-and-Swap (CAS) cho lock-free update
+Fencing token để tránh stale lock
+Lock contention monitoring
+13. IDEMPOTENCY
+Idempotency key design (client-generated UUID, composite key)
+Idempotency store: Redis, database
+Idempotency scope: API level, message consumer level, database level
+Deduplication strategy cho message (Kafka dedup, exactly-once semantic)
+Idempotent receiver pattern
+TTL cho idempotency key
+Idempotent database operation (UPSERT, INSERT ON CONFLICT)
+Handling duplicate device log/event
+14. RESILIENCE & FAULT TOLERANCE
+Circuit Breaker (Resilience4j, Hystrix, Sentinel): state machine, threshold config
+Retry policy: max retry, exponential backoff, jitter, retryable vs non-retryable error
+Timeout: connect timeout, read timeout, overall timeout
+Bulkhead: thread pool isolation, semaphore isolation
+Fallback strategy: default value, cache, degraded response
+Dead Letter Queue (DLQ) & poison message handling
+Graceful shutdown / graceful degradation
+Health check cascade
+Chaos engineering practice (Chaos Monkey, Litmus)
+Blast radius containment
+15. PERFORMANCE & OPTIMIZATION
+Connection pooling (HTTP, DB, gRPC channel)
+Batch processing vs single record processing
+Lazy loading vs eager loading
+Pagination: offset, cursor-based, keyset
+Projection: chỉ query field cần thiết
+N+1 query detection & prevention
+Index strategy: B-tree, hash, composite, partial, covering index
+Query optimization & explain plan
+Compression: gzip, snappy, zstd (message, API response, storage)
+Object pooling / buffer pooling
+Zero-copy (Kafka, Netty)
+Memory management: heap tuning, off-heap, GC tuning
+Async processing: tách heavy task ra worker
+Pre-computation / materialized view
+Hot path optimization
+16. SECURITY
+Authentication: OAuth2, OIDC, JWT, API key, mTLS
+Authorization: RBAC, ABAC, policy engine (OPA)
+Tenant-level access control
+Device authentication (certificate, token)
+Secret management (Vault, AWS Secrets Manager, K8s Secret)
+Data encryption: at rest, in transit (TLS), field-level
+Input validation & sanitization
+SQL injection, XSS prevention
+Audit logging
+CORS policy
+Network policy / firewall rule / zero trust
+17. CI/CD & DEPLOYMENT
+CI/CD pipeline per service
+Build strategy: Docker multi-stage, layer caching
+Deployment strategy: rolling, blue-green, canary, A/B
+Feature flag (LaunchDarkly, Unleash, custom)
+GitOps (ArgoCD, FluxCD)
+Artifact management (container registry, Helm chart repo)
+Database migration in CI/CD
+Smoke test, integration test post-deploy
+Rollback strategy
+Environment management: dev, staging, production
+18. OBSERVABILITY
+Structured logging (format, correlation ID, tenant context)
+Centralized log aggregation (ELK, Loki, Datadog)
+Distributed tracing (Jaeger, Zipkin, OpenTelemetry)
+Metrics collection (Prometheus, Micrometer, StatsD)
+Dashboard (Grafana, Kibana, Datadog)
+Alerting & escalation (PagerDuty, OpsGenie)
+SLI / SLO / SLA definition
+APM (Application Performance Monitoring)
+Custom business metrics (ingestion rate per tenant, transform latency)
+Log level management at runtime
+19. SCALING
+Horizontal scaling: stateless service, auto-scaling (HPA, KEDA)
+Vertical scaling: resource request/limit
+Scaling ingestion layer independently
+Scaling transform layer independently
+Scaling storage layer: DB sharding, read replica
+Kafka partition scaling, consumer group rebalancing
+Scale-to-zero (serverless, Knative)
+Capacity planning & load testing (k6, Gatling, Locust)
+Multi-region deployment
+Data locality & geo-partitioning
+20. MESSAGE QUEUE / EVENT STREAMING
+Kafka: topic design, partition strategy, consumer group, offset management
+Exactly-once vs at-least-once vs at-most-once semantics
+Message ordering guarantee (partition key design)
+Schema evolution (Avro + Schema Registry)
+Consumer lag monitoring
+Reprocessing / replay from offset
+Compacted topic vs retention-based topic
+Dead letter topic
+Message priority
+Transactional outbox + CDC (Debezium)
+Backpressure & flow control
+21. CONFIGURATION & FEATURE MANAGEMENT
+Centralized config (Spring Cloud Config, Consul, etcd)
+Per-tenant configuration store
+Dynamic config reload without restart
+Feature flag per tenant
+A/B testing framework
+Environment variable vs config file vs config server
+Config versioning & rollback
+Sensitive config separation
+22. TESTING STRATEGY
+Unit test, integration test, contract test, E2E test
+Test per service, test cross-service
+Load test / stress test / soak test
+Chaos test
+Test với multi-tenant scenario
+Test data management & test tenant isolation
+Mock external dependency (WireMock, Testcontainers)
+Consumer-driven contract test (Pact)
+Shadow traffic / traffic replay test
+23. DASHBOARD & REAL-TIME DELIVERY
+WebSocket vs SSE vs polling cho real-time dashboard
+Data aggregation layer cho dashboard query
+Pre-aggregated metrics vs on-the-fly query
+Time-series query optimization
+Dashboard tenant isolation (user chỉ thấy data của mình)
+Widget rendering strategy
+Export / report generation (PDF, CSV)
+Push notification / alert trigger
+24. DEVICE MANAGEMENT (đặc thù domain)
+Device registry & metadata store
+Device type / model classification
+Device protocol adapter (bridge pattern)
+Device firmware version tracking
+Device connectivity status (online/offline/heartbeat)
+Device grouping & tagging
+Bulk device operation (OTA update, config push)
